@@ -610,7 +610,7 @@ async function cloudLoad() {
       const data = await res.json();
       if (data && data.state) {
         Object.assign(state, data.state);
-        // 关键：云端载入后，强制清除旧存档里的怪物状态，避免画面卡死
+        // 强制清除旧存档里的怪物状态，避免卡死
         state.currentMonster = null;
         state.monsterHp = 0;
         state.monsterMaxHp = 0;
@@ -665,7 +665,7 @@ function generateEquip(forceQuality, boost) {
     } while (usedKeys.has(affix.key) && tries < 20);
     usedKeys.add(affix.key);
     const value = randFloat(affix.min, affix.max) * (1 + state.reincarnBonus);
-    affixes.push({ key: affix.key, name: affix.name, value, format: affix.format });
+    affixes.push({ key: affix.key, name: affix.name, value });
   }
 
   return {
@@ -696,7 +696,7 @@ function rerollRandomAffix() {
   const affixDef = AFFIXES.find(a => a.key === affix.key);
   const newVal = randFloat(affixDef.min, affixDef.max);
   affix.value = newVal;
-  affix.format = affixDef.format;
+  affix.name = affixDef.name;
   log(`洗练【${item.quality}·${item.name}】，${affix.name} 变为 ${(newVal*100).toFixed(1)}%`, "epic");
   updateUI();
   renderInventory();
@@ -933,7 +933,11 @@ function renderItemRow(item, mode) {
   div.className = "item " + item.quality;
   const lvText = item.level > 0 ? ` <span class="lvup">+${item.level}</span>` : "";
   const enhanceCost = item.enhanceCost * (item.level + 1);
-  const affixText = (item.affixes || []).map(a => a.format(safeNum(a.value))).join(" · ");
+  // 关键修复：从 AFFIXES 里现查 format 函数，不用存档里的
+  const affixText = (item.affixes || []).map(a => {
+    const def = AFFIXES.find(d => d.key === a.key);
+    return def ? def.format(safeNum(a.value)) : `${a.name || a.key} +${(safeNum(a.value)*100).toFixed(1)}%`;
+  }).join(" · ");
   const affixLine = affixText ? `<div class="stat-line">${affixText}</div>` : "";
 
   let buttons = "";
@@ -1325,7 +1329,6 @@ document.getElementById("resetBtn").addEventListener("click", resetGame);
 
 // ==================== 启动 ====================
 async function init() {
-  // 1. 先只加载本地，绝不写云端
   loadGame();
   bindInventoryEvents();
   log("你于洞府中睁开双眼，开始了偷偷摸摸的修仙之路……");
@@ -1336,12 +1339,10 @@ async function init() {
   renderShop();
   updateUI();
 
-  // 2. 尝试从云端拉存档，拉到就用云端的
   updateSyncStatus("云端存档：连接中…", "");
   const hasCloud = await cloudLoad();
   if (hasCloud) {
     log("已从云端载入存档", "gold");
-    // 云端存档不含怪物状态，如果缺失或非法，重新生成
     if (!state.currentMonster || !isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) {
       spawnMonster();
     }
@@ -1353,7 +1354,6 @@ async function init() {
     await cloudSave();
   }
 
-  // 3. 云端状态确定后，才开启自动保存
   cloudReady = true;
   updateSyncStatus("云端存档：已同步", "ok");
 
