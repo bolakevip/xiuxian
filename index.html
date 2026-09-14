@@ -373,7 +373,7 @@
 
   <div id="log"></div>
 
-  <div class="sync-status" id="syncStatus">云端存档：未连接</div>
+  <div class="sync-status" id="syncStatus">云端存档：初始化中…</div>
   <button class="btn" id="breakBtn" disabled>突破境界</button>
 </div>
 
@@ -414,7 +414,6 @@ const state = {
 };
 
 // ==================== 新境界体系（90 个阶段）====================
-// 修为需求：每个大境界的首层需求 = 前一大境界末层需求 × 12（前期）~ 8（后期）
 const BIG_REALMS = [
   { name: "炼气期", baseNeed: 50,           basePower: 5 },
   { name: "筑基期", baseNeed: 3000,         basePower: 300 },
@@ -428,7 +427,6 @@ const BIG_REALMS = [
   { name: "仙人期", baseNeed: 100000000000, basePower: 4000000000 },
 ];
 
-// 展开成 90 个阶段，同一大境界内 1→9 层需求逐层递增（末层约首层的 3 倍）
 const REALMS = [];
 BIG_REALMS.forEach((big, bigIdx) => {
   for (let sub = 1; sub <= 9; sub++) {
@@ -457,7 +455,6 @@ const ZONES = [
   { name: "鸿蒙本源", tier: 7, unlock: 63, desc: "鸿蒙道祖出没" },
 ];
 
-// 怪物经验大幅缩水，越低级区域给得越少
 const MONSTERS = {
   0: [
     { name: "野兔",   hp: 30,   atk: 4,   exp: 1,   gold: 1,   stone: 0, dropRate: 0.20 },
@@ -516,7 +513,6 @@ const QUALITY = [
   { name: "神品", color: "myth",    mult: 7.0, price: 3000,enhanceCost: 250, maxLv: 20, statCount: 4 },
 ];
 
-// 修为加成词条大幅削弱
 const AFFIXES = [
   { key: "crit",      name: "暴击",   min: 0.02, max: 0.08, format: v => `暴击 +${(v*100).toFixed(1)}%` },
   { key: "lifesteal", name: "吸血",   min: 0.01, max: 0.05, format: v => `吸血 +${(v*100).toFixed(1)}%` },
@@ -576,16 +572,20 @@ function log(msg, cls = "") {
 }
 
 // ==================== 云端存档 ====================
+let cloudReady = false;      // 云端状态是否已确定，确定前不自动保存
 let cloudSyncTimer = null;
+let lastCloudSave = 0;
 
 async function cloudSave() {
+  if (!cloudReady) return;
   try {
-    const res = await fetch("/.netlify/functions/sync", {
+    const res = await fetch("/api/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data: state }),
     });
     if (res.ok) {
+      lastCloudSave = Date.now();
       updateSyncStatus("云端存档：已同步", "ok");
     } else {
       updateSyncStatus("云端存档：同步失败", "err");
@@ -597,10 +597,11 @@ async function cloudSave() {
 
 async function cloudLoad() {
   try {
-    const res = await fetch("/.netlify/functions/sync");
+    const res = await fetch("/api/sync");
     if (res.ok) {
       const data = await res.json();
       if (data && data.state) {
+        // 关键：只有云端有有效存档时，才覆盖本地
         Object.assign(state, data.state);
         recalcPower();
         updateSyncStatus("云端存档：已载入", "ok");
@@ -610,7 +611,6 @@ async function cloudLoad() {
   } catch (e) {
     // 未登录或首次访问，忽略
   }
-  updateSyncStatus("云端存档：本地模式", "");
   return false;
 }
 
@@ -621,6 +621,7 @@ function updateSyncStatus(text, cls = "") {
 }
 
 function scheduleCloudSave() {
+  if (!cloudReady) return;
   if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
   cloudSyncTimer = setTimeout(cloudSave, 5000);
 }
@@ -1192,6 +1193,7 @@ function regenLoop() {
 
 // ==================== 存档 ====================
 function saveGame() {
+  if (!cloudReady) return; // 云端状态确定前，绝不保存
   state.exp = Math.max(0, safeNum(state.exp));
   state.gold = Math.max(0, safeNum(state.gold));
   state.stone = Math.max(0, safeNum(state.stone));
@@ -1259,7 +1261,13 @@ function resetGame() {
   if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
   localStorage.removeItem("xiuxian_arpg_save");
   localStorage.removeItem("xiuxian_arpg_time");
-  location.reload();
+  // 同时清云端
+  cloudReady = true;
+  fetch("/api/sync", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data: null }),
+  }).finally(() => location.reload());
 }
 
 // ==================== 事件 ====================
@@ -1306,9 +1314,8 @@ document.getElementById("resetBtn").addEventListener("click", resetGame);
 
 // ==================== 启动 ====================
 async function init() {
+  // 1. 先只加载本地，绝不写云端
   loadGame();
-  await cloudLoad();
-  offlineEarnings();
   bindInventoryEvents();
   log("你于洞府中睁开双眼，开始了偷偷摸摸的修仙之路……");
   log("提示：每个大境界分九层，修为需求指数级增长，越往后越难。", "rare");
@@ -1318,10 +1325,28 @@ async function init() {
   renderShop();
   updateUI();
 
+  // 2. 尝试从云端拉存档，拉到就用云端的
+  updateSyncStatus("云端存档：连接中…", "");
+  const hasCloud = await cloudLoad();
+  if (hasCloud) {
+    log("已从云端载入存档", "gold");
+    updateUI();
+    renderInventory();
+    renderZones();
+  } else {
+    // 云端没有存档，说明是第一次玩，把本地的推上去
+    updateSyncStatus("云端存档：首次上传", "");
+    await cloudSave();
+  }
+
+  // 3. 云端状态确定后，才开启自动保存
+  cloudReady = true;
+  updateSyncStatus("云端存档：已同步", "ok");
+
   setInterval(fightTick, 1000);
   setInterval(regenLoop, 2000);
-  setInterval(saveGame, 10000);
-  window.addEventListener("beforeunload", saveGame);
+  setInterval(() => { if (cloudReady) saveGame(); }, 10000);
+  window.addEventListener("beforeunload", () => { if (cloudReady) saveGame(); });
 }
 
 init();
