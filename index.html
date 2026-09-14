@@ -572,20 +572,29 @@ function log(msg, cls = "") {
 }
 
 // ==================== 云端存档 ====================
-let cloudReady = false;      // 云端状态是否已确定，确定前不自动保存
+let cloudReady = false;
 let cloudSyncTimer = null;
-let lastCloudSave = 0;
+
+// 提取需要保存的玩家数据（去掉怪物等临时状态）
+function extractSaveData() {
+  const d = { ...state };
+  delete d.currentMonster;
+  delete d.monsterHp;
+  delete d.monsterMaxHp;
+  delete d.isBoss;
+  delete d.bossType;
+  return d;
+}
 
 async function cloudSave() {
   if (!cloudReady) return;
   try {
-    const res = await fetch("/.netlify/functions/sync", {
+    const res = await fetch("/api/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data: state }),
+      body: JSON.stringify({ data: extractSaveData() }),
     });
     if (res.ok) {
-      lastCloudSave = Date.now();
       updateSyncStatus("云端存档：已同步", "ok");
     } else {
       updateSyncStatus("云端存档：同步失败", "err");
@@ -597,11 +606,10 @@ async function cloudSave() {
 
 async function cloudLoad() {
   try {
-    const res = await fetch("/.netlify/functions/sync");
+    const res = await fetch("/api/sync");
     if (res.ok) {
       const data = await res.json();
       if (data && data.state) {
-        // 关键：只有云端有有效存档时，才覆盖本地
         Object.assign(state, data.state);
         recalcPower();
         updateSyncStatus("云端存档：已载入", "ok");
@@ -842,7 +850,7 @@ function updateUI() {
   document.getElementById("breakBtn").disabled = state.exp < realm.need;
   document.getElementById("breakBtn").textContent = state.autoBreak ? "突破境界（自动）" : "突破境界（手动）";
 
-  if (state.currentMonster) {
+  if (state.currentMonster && isFinite(state.monsterHp) && isFinite(state.monsterMaxHp)) {
     const bossTag = state.isBoss ? ` <span class="boss-tag">[${state.bossType}]</span>` : "";
     document.getElementById("monsterName").innerHTML = `${state.currentMonster.name} Lv.${state.currentZone + 1}${bossTag}`;
     document.getElementById("monsterHpText").textContent = `${fmt(Math.max(0, state.monsterHp))} / ${fmt(state.monsterMaxHp)}`;
@@ -1065,6 +1073,7 @@ function spawnBoss(type) {
 
 function fightTick() {
   if (!state.currentMonster) { spawnMonster(); return; }
+  if (!isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) { spawnMonster(); return; }
   if (state.hp <= 0) return;
   if (state.stamina < 5) { state.stamina = Math.min(state.maxStamina, state.stamina + 2); return; }
   state.stamina -= 5;
@@ -1193,7 +1202,7 @@ function regenLoop() {
 
 // ==================== 存档 ====================
 function saveGame() {
-  if (!cloudReady) return; // 云端状态确定前，绝不保存
+  if (!cloudReady) return;
   state.exp = Math.max(0, safeNum(state.exp));
   state.gold = Math.max(0, safeNum(state.gold));
   state.stone = Math.max(0, safeNum(state.stone));
@@ -1203,7 +1212,7 @@ function saveGame() {
   state.sectPoint = Math.max(0, safeNum(state.sectPoint));
   state.monsterHp = safeNum(state.monsterHp);
   state.monsterMaxHp = safeNum(state.monsterMaxHp, 1);
-  localStorage.setItem("xiuxian_arpg_save", JSON.stringify(state));
+  localStorage.setItem("xiuxian_arpg_save", JSON.stringify(extractSaveData()));
   localStorage.setItem("xiuxian_arpg_time", Date.now());
   scheduleCloudSave();
 }
@@ -1261,9 +1270,8 @@ function resetGame() {
   if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
   localStorage.removeItem("xiuxian_arpg_save");
   localStorage.removeItem("xiuxian_arpg_time");
-  // 同时清云端
   cloudReady = true;
-  fetch("/api/sy/.netlify/functions/sync", {
+  fetch("/api/sync", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ data: null }),
@@ -1330,6 +1338,10 @@ async function init() {
   const hasCloud = await cloudLoad();
   if (hasCloud) {
     log("已从云端载入存档", "gold");
+    // 云端存档不含怪物状态，重新生成怪物
+    if (!state.currentMonster || !isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) {
+      spawnMonster();
+    }
     updateUI();
     renderInventory();
     renderZones();
