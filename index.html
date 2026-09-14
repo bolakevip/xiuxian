@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>偷偷摸摸修个仙 · ARPG版</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0e;
+    color: #d4d4d4;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    user-select: none;
+  }
+  #app {
+    width: 420px;
+    background: #14141a;
+    border: 1px solid #2a2a35;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    transition: width 0.3s, padding 0.3s;
+  }
+  .title {
+    font-size: 15px;
+    color: #c586c0;
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: 3px;
+    font-weight: bold;
+  }
+  .tabs {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 10px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 11px;
+    background: #1f1f28;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #777;
+    transition: all 0.2s;
+  }
+  .tab.active { background: #0e639c; color: #fff; }
+  .tab:hover:not(.active) { background: #2a2a35; color: #ccc; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin: 5px 0;
+    color: #9cdcfe;
+  }
+  .row span:last-child { color: #ce9178; font-weight: bold; }
+  .bar-bg {
+    height: 10px;
+    background: #1f1f28;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 4px 0 10px;
+  }
+  .bar-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s;
+    border-radius: 5px;
+  }
+  #hpFill { background: linear-gradient(90deg, #f14c4c, #ff8c8c); }
+  #expFill { background: linear-gradient(90deg, #4ec9b0, #6affd8); }
+  #staminaFill { background: linear-gradient(90deg, #dcdcaa, #fff8a8); }
+  #monsterHpFill { background: linear-gradient(90deg, #c586c0, #ff9de0); }
+
+  .battle-box {
+    background: #0e0e12;
+    border: 1px solid #2a2a35;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 8px;
+  }
+  .battle-title {
+    font-size: 12px;
+    color: #c586c0;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .battle-title .lvl { color: #ffd700; font-size: 11px; }
+  .battle-title .boss-tag { color: #ff6b6b; font-weight: bold; }
+
+  #log {
+    height: 140px;
+    overflow-y: auto;
+    background: #0e0e12;
+    border: 1px solid #2a2a35;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #808080;
+    margin-top: 8px;
+  }
+  #log div { margin-bottom: 2px; }
+  #log::-webkit-scrollbar { width: 4px; }
+  #log::-webkit-scrollbar-thumb { background: #3a3a48; border-radius: 2px; }
+
+  .rare   { color: #4ec9b0; }
+  .epic   { color: #c586c0; }
+  .legend { color: #dcdcaa; font-weight: bold; }
+  .danger { color: #f14c4c; }
+  .gold   { color: #ffd700; }
+  .myth   { color: #ff6b6b; font-weight: bold; text-shadow: 0 0 6px #ff6b6b; }
+  .set    { color: #6affd8; font-weight: bold; }
+
+  .btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px;
+    background: #0e639c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+  }
+  .btn:hover:not(:disabled) { background: #1177bb; }
+  .btn:disabled { background: #222; cursor: not-allowed; color: #555; }
+  .btn.small { padding: 5px; font-size: 11px; margin-top: 4px; }
+  .btn.gold { background: #8a6d0a; }
+  .btn.gold:hover:not(:disabled) { background: #b08a0e; }
+  .btn.danger { background: #8a2a2a; }
+  .btn.danger:hover:not(:disabled) { background: #b03a3a; }
+
+  .item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background: #1a1a22;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    font-size: 11px;
+    border-left: 3px solid #444;
+    gap: 8px;
+  }
+  .item.灵品 { border-left-color: #4ec9b0; }
+  .item.宝品 { border-left-color: #c586c0; }
+  .item.仙品 { border-left-color: #dcdcaa; }
+  .item.神品 { border-left-color: #ff6b6b; box-shadow: 0 0 8px rgba(255,107,107,0.25); }
+  .item .name { color: #ccc; font-size: 12px; }
+  .item .attr { color: #888; font-size: 10px; margin-top: 2px; }
+  .item .lvup { color: #4ec9b0; font-size: 10px; }
+  .item .stat-line { color: #6affd8; font-size: 10px; margin-top: 1px; }
+  .item button {
+    background: #0e639c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 9px;
+    font-size: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .item button:hover { background: #1177bb; }
+  .item button.enhance { background: #7a3d9c; }
+  .item button.enhance:hover { background: #9b4dc4; }
+  .item button.sell { background: #8a3a3a; }
+  .item button.sell:hover { background: #b04a4a; }
+  .empty { color: #555; text-align: center; padding: 20px; font-size: 12px; }
+
+  .toggle {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    background: #1f1f28;
+    color: #ccc;
+    border: 1px solid #3a3a48;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 100;
+  }
+  .toggle:hover { background: #2a2a35; }
+
+  .mini #log, .mini .bar-bg, .mini .tabs, .mini .panel,
+  .mini .btn, .mini #inventoryList, .mini #shopList,
+  .mini .battle-box, .mini #sellBar { display: none; }
+  .mini .mini-info { display: block; }
+  .mini { width: 210px; padding: 10px; }
+  .mini-info { display: none; }
+  .mini-info .row { margin: 3px 0; font-size: 11px; }
+
+  .shop-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background: #1a1a22;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    font-size: 11px;
+    gap: 8px;
+  }
+  .shop-item .price { color: #ffd700; }
+  .shop-item button {
+    background: #0e639c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 9px;
+    font-size: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .zone-select {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .zone {
+    flex: 1;
+    min-width: 60px;
+    text-align: center;
+    padding: 5px 4px;
+    font-size: 11px;
+    background: #1f1f28;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #777;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .zone.active { background: #2d4a2d; color: #8fd98f; border-color: #4a7a4a; }
+  .zone.locked { opacity: 0.35; cursor: not-allowed; }
+  .zone:hover:not(.active):not(.locked) { background: #2a2a35; color: #ccc; }
+
+  .boss-row {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  .boss-btn {
+    flex: 1;
+    padding: 6px;
+    background: #3a1a1a;
+    border: 1px solid #6a2a2a;
+    border-radius: 6px;
+    color: #ff8c8c;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .boss-btn:hover:not(:disabled) { background: #5a2a2a; color: #ffb0b0; }
+  .boss-btn:disabled { background: #1a1a22; color: #555; border-color: #2a2a35; cursor: not-allowed; }
+
+  .reincarn-box {
+    background: #1a1a22;
+    border: 1px solid #3a3a48;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .reincarn-box h3 { color: #ffd700; font-size: 13px; margin-bottom: 8px; }
+  .reincarn-box p { color: #888; font-size: 11px; margin-bottom: 10px; line-height: 1.6; }
+  .reincarn-box .big { color: #ff6b6b; font-size: 22px; font-weight: bold; margin: 8px 0; }
+  .sync-status { font-size: 11px; text-align: center; margin-top: 4px; color: #888; }
+  .sync-status.ok { color: #4ec9b0; }
+  .sync-status.err { color: #f14c4c; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="title">偷偷摸摸修个仙 · ARPG</div>
+
+  <div class="mini-info">
+    <div class="row"><span>境界</span><span id="miniRealm">炼气一层</span></div>
+    <div class="row"><span>修为</span><span id="miniExp">0/10</span></div>
+    <div class="row"><span>气血</span><span id="miniHp">100/100</span></div>
+    <div class="row"><span>战力</span><span id="miniPower">10</span></div>
+    <div class="row"><span>灵石</span><span id="miniGold">0</span></div>
+    <div class="row"><span>强化石</span><span id="miniStone">0</span></div>
+    <div class="row"><span>转生</span><span id="miniReincarn">0</span></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="cultivate">修炼</div>
+    <div class="tab" data-tab="inventory">背包</div>
+    <div class="tab" data-tab="shop">商店</div>
+    <div class="tab" data-tab="sect">宗门</div>
+    <div class="tab" data-tab="reincarn">转生</div>
+  </div>
+
+  <div class="panel active" id="panel-cultivate">
+    <div class="row"><span>境界</span><span id="realm">炼气一层</span></div>
+    <div class="row"><span>修为</span><span id="expText">0 / 10</span></div>
+    <div class="bar-bg"><div class="bar-fill" id="expFill"></div></div>
+
+    <div class="row"><span>气血</span><span id="hpText">100 / 100</span></div>
+    <div class="bar-bg"><div class="bar-fill" id="hpFill"></div></div>
+
+    <div class="row"><span>体力</span><span id="staminaText">100 / 100</span></div>
+    <div class="bar-bg"><div class="bar-fill" id="staminaFill"></div></div>
+
+    <div class="row"><span>战力</span><span id="power">10</span></div>
+    <div class="row"><span>暴击/吸血</span><span id="combatStats">5% / 0%</span></div>
+    <div class="row"><span>灵石</span><span id="gold">0</span></div>
+    <div class="row"><span>强化石</span><span id="stone">0</span></div>
+    <div class="row"><span>击杀</span><span id="kills">0</span></div>
+
+    <div class="battle-box">
+      <div class="battle-title">
+        <span id="monsterName">妖狼 Lv.1</span>
+        <span class="lvl" id="monsterState">战斗中</span>
+      </div>
+      <div class="bar-bg" style="margin-bottom:6px;"><div class="bar-fill" id="monsterHpFill" style="width:100%"></div></div>
+      <div class="row" style="margin:0;font-size:11px;"><span>怪物气血</span><span id="monsterHpText">100 / 100</span></div>
+    </div>
+
+    <div class="zone-select" id="zoneSelect"></div>
+
+    <div class="boss-row" id="bossRow">
+      <button class="boss-btn" id="bossBtn1" disabled>区域BOSS</button>
+      <button class="boss-btn" id="bossBtn2" disabled>世界BOSS</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-inventory">
+    <div id="sellBar" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;"></div>
+    <div id="inventoryList"><div class="empty">背包空空如也</div></div>
+  </div>
+
+  <div class="panel" id="panel-shop">
+    <div id="shopList"></div>
+  </div>
+
+  <div class="panel" id="panel-sect">
+    <div class="row"><span>宗门贡献</span><span id="sectPoint">0</span></div>
+    <div class="row"><span>每日任务</span><span id="sectQuest">讨伐 0/5</span></div>
+    <button class="btn" id="sectTaskBtn">提升任务目标（20 贡献）</button>
+    <button class="btn" id="sectUpgradeBtn">消耗 30 贡献提升基础战力</button>
+  </div>
+
+  <div class="panel" id="panel-reincarn">
+    <div class="reincarn-box">
+      <h3>转生系统</h3>
+      <p>转生将重置境界、装备、灵石，但永久保留转生加成。<br>每次转生永久提升 <b>20%</b> 全属性。</p>
+      <div class="big" id="reincarnBonus">+0%</div>
+      <div class="row" style="justify-content:center;gap:20px;">
+        <span>转生次数：<b id="reincarnCount">0</b></span>
+        <span>需求境界：<b id="reincarnNeed">筑基一层</b></span>
+      </div>
+      <button class="btn gold" id="reincarnBtn" disabled>转生</button>
+      <button class="btn danger" id="resetBtn">清空存档，重新开始</button>
+    </div>
+  </div>
+
+  <div id="log"></div>
+
+  <div class="sync-status" id="syncStatus">云端存档：未连接</div>
+  <button class="btn" id="breakBtn" disabled>突破境界</button>
+</div>
+
+<button class="toggle" id="toggleBtn">迷你模式</button>
+
+<script>
+// ==================== 数据 ====================
+const state = {
+  realmIndex: 0,
+  exp: 0,
+  hp: 100,
+  maxHp: 100,
+  stamina: 100,
+  maxStamina: 100,
+  basePower: 10,
+  totalEquipBonus: 0,
+  power: 10,
+  critRate: 0.05,
+  lifesteal: 0,
+  gold: 0,
+  stone: 0,
+  kills: 0,
+  sectPoint: 0,
+  sectQuestProgress: 0,
+  sectQuestTarget: 5,
+  autoBreak: true,
+  inventory: [],
+  equipment: { weapon: null, armor: null, accessory: null },
+  currentZone: 0,
+  currentMonster: null,
+  monsterHp: 0,
+  monsterMaxHp: 0,
+  isBoss: false,
+  bossType: null,
+  reincarnCount: 0,
+  reincarnBonus: 0,
+  setBonus: { active: false, count: 0, name: "" },
+};
+
+// ==================== 新境界体系（90 个阶段）====================
+// 修为需求：每个大境界的首层需求 = 前一大境界末层需求 × 12（前期）~ 8（后期）
+const BIG_REALMS = [
+  { name: "炼气期", baseNeed: 50,           basePower: 5 },
+  { name: "筑基期", baseNeed: 3000,         basePower: 300 },
+  { name: "金丹期", baseNeed: 60000,        basePower: 3000 },
+  { name: "元婴期", baseNeed: 800000,       basePower: 25000 },
+  { name: "化神期", baseNeed: 8000000,      basePower: 200000 },
+  { name: "炼虚期", baseNeed: 60000000,     basePower: 1500000 },
+  { name: "合体期", baseNeed: 400000000,    basePower: 10000000 },
+  { name: "大乘期", baseNeed: 2500000000,   basePower: 70000000 },
+  { name: "渡劫期", baseNeed: 15000000000,  basePower: 500000000 },
+  { name: "仙人期", baseNeed: 100000000000, basePower: 4000000000 },
+];
+
+// 展开成 90 个阶段，同一大境界内 1→9 层需求逐层递增（末层约首层的 3 倍）
+const REALMS = [];
+BIG_REALMS.forEach((big, bigIdx) => {
+  for (let sub = 1; sub <= 9; sub++) {
+    const progress = (sub - 1) / 8;
+    const need = Math.floor(big.baseNeed * (1 + progress * 2));
+    const power = Math.floor(big.basePower * (1 + progress * 2));
+    REALMS.push({
+      name: big.name + sub + "层",
+      big: big.name,
+      sub: sub,
+      need: need,
+      power: power,
+      bigIndex: bigIdx,
+    });
+  }
+});
+
+const ZONES = [
+  { name: "新手村",   tier: 0, unlock: 0,  desc: "野兔、山猪出没" },
+  { name: "幽暗森林", tier: 1, unlock: 9,  desc: "妖狼、黑熊精横行" },
+  { name: "乱魂谷",   tier: 2, unlock: 18, desc: "邪修、魔将盘踞" },
+  { name: "万妖山",   tier: 3, unlock: 27, desc: "妖王、魔尊镇守" },
+  { name: "九幽冥界", tier: 4, unlock: 36, desc: "冥将、鬼帝出没" },
+  { name: "仙界裂缝", tier: 5, unlock: 45, desc: "仙人、古神降临" },
+  { name: "混沌之外", tier: 6, unlock: 54, desc: "混沌古神镇守" },
+  { name: "鸿蒙本源", tier: 7, unlock: 63, desc: "鸿蒙道祖出没" },
+];
+
+// 怪物经验大幅缩水，越低级区域给得越少
+const MONSTERS = {
+  0: [
+    { name: "野兔",   hp: 30,   atk: 4,   exp: 1,   gold: 1,   stone: 0, dropRate: 0.20 },
+    { name: "山猪",   hp: 70,   atk: 10,  exp: 2,   gold: 2,   stone: 0, dropRate: 0.25 },
+    { name: "灵狐",   hp: 50,   atk: 8,   exp: 2,   gold: 3,   stone: 1, dropRate: 0.30 },
+  ],
+  1: [
+    { name: "妖狼",   hp: 300,  atk: 30,  exp: 15,  gold: 5,   stone: 1, dropRate: 0.35 },
+    { name: "黑熊精", hp: 800,  atk: 70,  exp: 35,  gold: 12,  stone: 2, dropRate: 0.40 },
+    { name: "树妖",   hp: 600,  atk: 55,  exp: 28,  gold: 10,  stone: 2, dropRate: 0.40 },
+  ],
+  2: [
+    { name: "邪修",   hp: 5000,  atk: 400,  exp: 200,  gold: 30,  stone: 3, dropRate: 0.45 },
+    { name: "魔将",   hp: 12000, atk: 900,  exp: 500,  gold: 80,  stone: 5, dropRate: 0.50 },
+    { name: "血魔",   hp: 9000,  atk: 700,  exp: 380,  gold: 60,  stone: 4, dropRate: 0.50 },
+  ],
+  3: [
+    { name: "妖王",   hp: 60000,  atk: 3500,  exp: 3000,  gold: 200, stone: 10, dropRate: 0.55 },
+    { name: "魔尊",   hp: 100000, atk: 5500,  exp: 5000,  gold: 350, stone: 15, dropRate: 0.60 },
+    { name: "古兽",   hp: 80000,  atk: 4500,  exp: 4000,  gold: 280, stone: 12, dropRate: 0.60 },
+  ],
+  4: [
+    { name: "冥将",   hp: 600000,  atk: 30000,  exp: 30000,  gold: 600,  stone: 25, dropRate: 0.65 },
+    { name: "鬼帝",   hp: 1000000, atk: 50000,  exp: 50000,  gold: 1000, stone: 40, dropRate: 0.70 },
+  ],
+  5: [
+    { name: "仙人残魂", hp: 6000000,  atk: 300000,  exp: 300000,  gold: 3000,  stone: 80,  dropRate: 0.75 },
+    { name: "古神卫",   hp: 10000000, atk: 500000,  exp: 500000,  gold: 5000,  stone: 120, dropRate: 0.80 },
+  ],
+  6: [
+    { name: "混沌兽",   hp: 80000000,  atk: 3000000,  exp: 3000000,  gold: 20000,  stone: 300,  dropRate: 0.85 },
+    { name: "虚空魔",   hp: 130000000, atk: 5000000,  exp: 5000000,  gold: 35000,  stone: 450,  dropRate: 0.88 },
+  ],
+  7: [
+    { name: "鸿蒙道兵", hp: 600000000,  atk: 25000000,  exp: 25000000,  gold: 120000,  stone: 1000, dropRate: 0.90 },
+    { name: "道祖残念", hp: 1000000000, atk: 40000000,  exp: 40000000,  gold: 250000,  stone: 1800, dropRate: 0.95 },
+  ],
+};
+
+const BOSSES = {
+  zone: { name: "区域BOSS", hpMult: 3, atkMult: 1.8, expMult: 3, goldMult: 4, stoneMult: 3, dropRate: 1.0, qualityBoost: 1 },
+  world: { name: "世界BOSS", hpMult: 8, atkMult: 3, expMult: 8, goldMult: 10, stoneMult: 6, dropRate: 1.0, qualityBoost: 2 },
+};
+
+const EQUIP_SLOTS = [
+  { slot: "weapon",    label: "武器", names: ["青锋剑", "赤霄剑", "诛仙剑", "太虚剑", "斩仙剑"] },
+  { slot: "armor",     label: "护甲", names: ["玄铁甲", "流云袍", "紫金甲", "天蚕宝衣", "仙灵战铠"] },
+  { slot: "accessory", label: "饰品", names: ["聚灵符", "清心玉佩", "紫金葫芦", "太虚镜", "轮回珠"] },
+];
+
+const QUALITY = [
+  { name: "凡品", color: "",        mult: 1.0, price: 10,  enhanceCost: 5,   maxLv: 5,  statCount: 0 },
+  { name: "灵品", color: "rare",    mult: 1.6, price: 50,  enhanceCost: 15,  maxLv: 8,  statCount: 1 },
+  { name: "宝品", color: "epic",    mult: 2.5, price: 200, enhanceCost: 40,  maxLv: 12, statCount: 2 },
+  { name: "仙品", color: "legend",  mult: 4.0, price: 800, enhanceCost: 100, maxLv: 15, statCount: 3 },
+  { name: "神品", color: "myth",    mult: 7.0, price: 3000,enhanceCost: 250, maxLv: 20, statCount: 4 },
+];
+
+// 修为加成词条大幅削弱
+const AFFIXES = [
+  { key: "crit",      name: "暴击",   min: 0.02, max: 0.08, format: v => `暴击 +${(v*100).toFixed(1)}%` },
+  { key: "lifesteal", name: "吸血",   min: 0.01, max: 0.05, format: v => `吸血 +${(v*100).toFixed(1)}%` },
+  { key: "power",     name: "战力",   min: 0.05, max: 0.20, format: v => `战力 +${(v*100).toFixed(0)}%` },
+  { key: "hp",        name: "气血",   min: 0.05, max: 0.15, format: v => `气血 +${(v*100).toFixed(0)}%` },
+  { key: "exp",       name: "修为",   min: 0.02, max: 0.08, format: v => `修为 +${(v*100).toFixed(0)}%` },
+  { key: "gold",      name: "灵石",   min: 0.05, max: 0.20, format: v => `灵石 +${(v*100).toFixed(0)}%` },
+  { key: "drop",      name: "掉宝",   min: 0.03, max: 0.10, format: v => `掉宝率 +${(v*100).toFixed(0)}%` },
+];
+
+const SETS = [
+  { name: "青锋套", pieces: ["青锋剑", "玄铁甲", "聚灵符"], bonus: { power: 0.15, crit: 0.05 } },
+  { name: "赤霄套", pieces: ["赤霄剑", "流云袍", "清心玉佩"], bonus: { power: 0.25, lifesteal: 0.05 } },
+  { name: "诛仙套", pieces: ["诛仙剑", "紫金甲", "紫金葫芦"], bonus: { power: 0.40, crit: 0.10 } },
+  { name: "太虚套", pieces: ["太虚剑", "天蚕宝衣", "太虚镜"], bonus: { power: 0.60, lifesteal: 0.10 } },
+  { name: "斩仙套", pieces: ["斩仙剑", "仙灵战铠", "轮回珠"], bonus: { power: 1.00, crit: 0.15, lifesteal: 0.15 } },
+];
+
+const SHOP_ITEMS = [
+  { name: "小还丹",     price: 20,  desc: "恢复 50 气血",         action: () => { state.hp = Math.min(state.maxHp, state.hp + 50); log("服用小还丹，气血 +50", "rare"); } },
+  { name: "大还丹",     price: 80,  desc: "恢复全部气血",         action: () => { state.hp = state.maxHp; log("服用大还丹，气血全满", "rare"); } },
+  { name: "聚气丹",     price: 100, desc: "获得 100 修为",         action: () => { state.exp += 100; log("服用聚气丹，修为 +100", "rare"); } },
+  { name: "淬体丹",     price: 300, desc: "永久提升 20 基础战力",  action: () => { state.basePower += 20; recalcPower(); log("服用淬体丹，基础战力 +20", "epic"); } },
+  { name: "强化石礼包", price: 150, desc: "获得 10 颗强化石",      action: () => { state.stone += 10; log("获得强化石 ×10", "gold"); } },
+  { name: "洗练石",     price: 500, desc: "随机洗练一件背包装备词条", action: () => { rerollRandomAffix(); } },
+  { name: "灵品装备箱", price: 200, desc: "随机灵品装备",          action: () => { const eq = generateEquip("灵品"); state.inventory.push(eq); log(`获得【灵品·${eq.name}】`, "rare"); } },
+  { name: "宝品装备箱", price: 800, desc: "随机宝品装备",          action: () => { const eq = generateEquip("宝品"); state.inventory.push(eq); log(`获得【宝品·${eq.name}】`, "epic"); } },
+  { name: "仙品装备箱", price: 3000,desc: "随机仙品装备",          action: () => { const eq = generateEquip("仙品"); state.inventory.push(eq); log(`获得【仙品·${eq.name}】`, "legend"); } },
+];
+
+// ==================== 工具 ====================
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randFloat(min, max) { return Math.random() * (max - min) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function fmt(n) {
+  const num = Number(n);
+  if (!isFinite(num)) return "0";
+  if (num >= 100000000) return (num / 100000000).toFixed(2) + "亿";
+  if (num >= 10000) return (num / 10000).toFixed(2) + "万";
+  return Math.floor(num).toLocaleString("en-US");
+}
+
+function safeNum(n, fallback = 0) {
+  const num = Number(n);
+  return isFinite(num) ? num : fallback;
+}
+
+function log(msg, cls = "") {
+  const logEl = document.getElementById("log");
+  const div = document.createElement("div");
+  div.className = cls;
+  div.textContent = msg;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+  while (logEl.children.length > 80) logEl.removeChild(logEl.firstChild);
+}
+
+// ==================== 云端存档 ====================
+let cloudSyncTimer = null;
+
+async function cloudSave() {
+  try {
+    const res = await fetch("/.netlify/functions/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: state }),
+    });
+    if (res.ok) {
+      updateSyncStatus("云端存档：已同步", "ok");
+    } else {
+      updateSyncStatus("云端存档：同步失败", "err");
+    }
+  } catch (e) {
+    updateSyncStatus("云端存档：离线", "err");
+  }
+}
+
+async function cloudLoad() {
+  try {
+    const res = await fetch("/.netlify/functions/sync");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.state) {
+        Object.assign(state, data.state);
+        recalcPower();
+        updateSyncStatus("云端存档：已载入", "ok");
+        return true;
+      }
+    }
+  } catch (e) {
+    // 未登录或首次访问，忽略
+  }
+  updateSyncStatus("云端存档：本地模式", "");
+  return false;
+}
+
+function updateSyncStatus(text, cls = "") {
+  const el = document.getElementById("syncStatus");
+  el.textContent = text;
+  el.className = "sync-status " + cls;
+}
+
+function scheduleCloudSave() {
+  if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(cloudSave, 5000);
+}
+
+// ==================== 装备生成 ====================
+function generateEquip(forceQuality, boost) {
+  const type = pick(EQUIP_SLOTS);
+  const quality = forceQuality
+    ? QUALITY.find(q => q.name === forceQuality)
+    : (() => {
+        const b = state.currentZone * 0.05 + (boost || 0) * 0.1;
+        const r = Math.random();
+        if (r < 0.55 - b) return QUALITY[0];
+        if (r < 0.85 - b) return QUALITY[1];
+        if (r < 0.97 - b) return QUALITY[2];
+        if (r < 0.995 - b * 0.5) return QUALITY[3];
+        return QUALITY[4];
+      })();
+  const basePower = 5 + state.realmIndex * 8 + state.currentZone * 20;
+  const power = Math.floor(basePower * quality.mult * (0.8 + Math.random() * 0.4));
+
+  const affixes = [];
+  const usedKeys = new Set();
+  for (let i = 0; i < quality.statCount; i++) {
+    let affix;
+    let tries = 0;
+    do {
+      affix = pick(AFFIXES);
+      tries++;
+    } while (usedKeys.has(affix.key) && tries < 20);
+    usedKeys.add(affix.key);
+    const value = randFloat(affix.min, affix.max) * (1 + state.reincarnBonus);
+    affixes.push({ key: affix.key, name: affix.name, value, format: affix.format });
+  }
+
+  return {
+    id: Date.now() + Math.random(),
+    name: pick(type.names),
+    slot: type.slot,
+    slotLabel: type.label,
+    quality: quality.name,
+    qualityColor: quality.color,
+    power: power,
+    basePower: power,
+    level: 0,
+    maxLevel: quality.maxLv,
+    enhanceCost: quality.enhanceCost,
+    affixes: affixes,
+  };
+}
+
+function rerollRandomAffix() {
+  if (state.inventory.length === 0) {
+    log("背包里没有可洗练的装备", "danger");
+    return;
+  }
+  const candidates = state.inventory.filter(i => i.affixes.length > 0);
+  if (candidates.length === 0) { log("没有可洗练的装备", "danger"); return; }
+  const item = pick(candidates);
+  const affix = pick(item.affixes);
+  const affixDef = AFFIXES.find(a => a.key === affix.key);
+  const newVal = randFloat(affixDef.min, affixDef.max);
+  affix.value = newVal;
+  affix.format = affixDef.format;
+  log(`洗练【${item.quality}·${item.name}】，${affix.name} 变为 ${(newVal*100).toFixed(1)}%`, "epic");
+  updateUI();
+  renderInventory();
+}
+
+// ==================== 属性计算 ====================
+function calcEquipStats() {
+  let power = 0, crit = 0, lifesteal = 0, hpBonus = 0, expBonus = 0, goldBonus = 0, dropBonus = 0;
+  const equipped = Object.values(state.equipment).filter(Boolean);
+
+  equipped.forEach(item => {
+    power += safeNum(item.power);
+    (item.affixes || []).forEach(a => {
+      const v = safeNum(a.value);
+      if (a.key === "crit") crit += v;
+      else if (a.key === "lifesteal") lifesteal += v;
+      else if (a.key === "hp") hpBonus += v;
+      else if (a.key === "exp") expBonus += v;
+      else if (a.key === "gold") goldBonus += v;
+      else if (a.key === "drop") dropBonus += v;
+      else if (a.key === "power") power += safeNum(item.power) * v;
+    });
+  });
+
+  const names = equipped.map(i => i.name);
+  let setBonus = { active: false, count: 0, name: "" };
+  for (const set of SETS) {
+    const count = set.pieces.filter(p => names.includes(p)).length;
+    if (count >= 2) {
+      setBonus = { active: true, count, name: set.name };
+      if (set.bonus.power) power *= (1 + set.bonus.power);
+      if (set.bonus.crit) crit += set.bonus.crit;
+      if (set.bonus.lifesteal) lifesteal += set.bonus.lifesteal;
+    }
+  }
+
+  return { power, crit, lifesteal, hpBonus, expBonus, goldBonus, dropBonus, setBonus };
+}
+
+function recalcPower() {
+  const stats = calcEquipStats();
+  const reincMult = 1 + safeNum(state.reincarnBonus);
+  state.totalEquipBonus = safeNum(stats.power);
+  state.power = Math.floor((safeNum(state.basePower) + stats.power) * reincMult);
+  state.critRate = 0.05 + safeNum(stats.crit);
+  state.lifesteal = safeNum(stats.lifesteal);
+  state.hpBonus = safeNum(stats.hpBonus);
+  state.expBonus = safeNum(stats.expBonus);
+  state.goldBonus = safeNum(stats.goldBonus);
+  state.dropBonus = safeNum(stats.dropBonus);
+  state.setBonus = stats.setBonus;
+  const newMaxHp = Math.floor((100 + state.realmIndex * 60) * (1 + stats.hpBonus) * reincMult);
+  if (newMaxHp > state.maxHp) {
+    state.hp += newMaxHp - state.maxHp;
+    state.maxHp = newMaxHp;
+  }
+  state.exp = Math.max(0, safeNum(state.exp));
+  state.gold = Math.max(0, safeNum(state.gold));
+  state.stone = Math.max(0, safeNum(state.stone));
+  state.hp = Math.max(0, safeNum(state.hp));
+  state.maxHp = Math.max(100, safeNum(state.maxHp, 100));
+  state.stamina = Math.max(0, safeNum(state.stamina));
+  state.maxStamina = Math.max(100, safeNum(state.maxStamina, 100));
+  state.kills = Math.max(0, safeNum(state.kills));
+  state.sectPoint = Math.max(0, safeNum(state.sectPoint));
+}
+
+// ==================== 装备操作 ====================
+function enhanceEquip(item) {
+  if (item.level >= item.maxLevel) { log(`${item.name} 已达强化上限`, "danger"); return false; }
+  const cost = item.enhanceCost * (item.level + 1);
+  if (state.stone < cost) { log(`强化石不足（需要 ${cost}）`, "danger"); return false; }
+  state.stone -= cost;
+  item.level++;
+  const gain = Math.floor(item.basePower * 0.15 * item.level);
+  item.power = item.basePower + gain;
+  recalcPower();
+  log(`强化成功！【${item.quality}·${item.name}】+${item.level}，战力 ${item.power}`, item.qualityColor);
+  return true;
+}
+
+function equipItem(item) {
+  const old = state.equipment[item.slot];
+  if (old) state.inventory.push(old);
+  state.equipment[item.slot] = item;
+  state.inventory = state.inventory.filter(i => i.id !== item.id);
+  recalcPower();
+  log(`装备【${item.quality}·${item.name} +${item.level}】`, item.qualityColor);
+  updateUI();
+  renderInventory();
+}
+
+function unequipItem(slot) {
+  const item = state.equipment[slot];
+  if (!item) return;
+  state.inventory.push(item);
+  state.equipment[slot] = null;
+  recalcPower();
+  log(`卸下【${item.quality}·${item.name}】`);
+  updateUI();
+  renderInventory();
+}
+
+function sellItem(item) {
+  const quality = QUALITY.find(q => q.name === item.quality);
+  let price = Math.floor(quality.price * (1 + item.level * 0.2));
+  (item.affixes || []).forEach(a => { if (a.key === "gold") price = Math.floor(price * (1 + safeNum(a.value))); });
+  state.gold += price;
+  state.inventory = state.inventory.filter(i => i.id !== item.id);
+  log(`出售【${item.quality}·${item.name}】，获得 ${price} 灵石`, "gold");
+  updateUI();
+  renderInventory();
+}
+
+function sellByQuality(quality) {
+  const items = state.inventory.filter(i => i.quality === quality);
+  if (items.length === 0) {
+    log(`背包里没有${quality}装备`, "danger");
+    return;
+  }
+  const qualityDef = QUALITY.find(q => q.name === quality);
+  let totalGold = 0;
+  items.forEach(item => {
+    let price = Math.floor(qualityDef.price * (1 + item.level * 0.2));
+    (item.affixes || []).forEach(a => {
+      if (a.key === "gold") price = Math.floor(price * (1 + safeNum(a.value)));
+    });
+    totalGold += price;
+  });
+  state.inventory = state.inventory.filter(i => i.quality !== quality);
+  state.gold += totalGold;
+  log(`批量出售 ${items.length} 件【${quality}】装备，获得 ${totalGold} 灵石`, "gold");
+  updateUI();
+  renderInventory();
+}
+
+// ==================== UI ====================
+function updateUI() {
+  const realm = REALMS[state.realmIndex];
+  document.getElementById("realm").textContent = realm.name;
+  document.getElementById("expText").textContent = `${fmt(state.exp)} / ${fmt(realm.need)}`;
+  document.getElementById("expFill").style.width = Math.min(100, (safeNum(state.exp) / realm.need) * 100) + "%";
+  document.getElementById("hpText").textContent = `${fmt(state.hp)} / ${fmt(state.maxHp)}`;
+  document.getElementById("hpFill").style.width = Math.max(0, Math.min(100, (safeNum(state.hp) / state.maxHp) * 100)) + "%";
+  document.getElementById("staminaText").textContent = `${fmt(state.stamina)} / ${fmt(state.maxStamina)}`;
+  document.getElementById("staminaFill").style.width = Math.max(0, Math.min(100, (safeNum(state.stamina) / state.maxStamina) * 100)) + "%";
+  document.getElementById("power").textContent = fmt(state.power);
+  document.getElementById("combatStats").textContent = `${(safeNum(state.critRate)*100).toFixed(0)}% / ${(safeNum(state.lifesteal)*100).toFixed(0)}%`;
+  document.getElementById("gold").textContent = fmt(state.gold);
+  document.getElementById("stone").textContent = fmt(state.stone);
+  document.getElementById("kills").textContent = fmt(state.kills);
+  document.getElementById("sectPoint").textContent = fmt(state.sectPoint);
+  document.getElementById("sectQuest").textContent = `讨伐 ${state.sectQuestProgress}/${state.sectQuestTarget}`;
+  document.getElementById("breakBtn").disabled = state.exp < realm.need;
+  document.getElementById("breakBtn").textContent = state.autoBreak ? "突破境界（自动）" : "突破境界（手动）";
+
+  if (state.currentMonster) {
+    const bossTag = state.isBoss ? ` <span class="boss-tag">[${state.bossType}]</span>` : "";
+    document.getElementById("monsterName").innerHTML = `${state.currentMonster.name} Lv.${state.currentZone + 1}${bossTag}`;
+    document.getElementById("monsterHpText").textContent = `${fmt(Math.max(0, state.monsterHp))} / ${fmt(state.monsterMaxHp)}`;
+    document.getElementById("monsterHpFill").style.width = Math.max(0, (state.monsterHp / state.monsterMaxHp) * 100) + "%";
+    document.getElementById("monsterState").textContent = state.monsterHp > 0 ? "战斗中" : "已击杀";
+  }
+
+  document.getElementById("miniRealm").textContent = realm.name;
+  document.getElementById("miniExp").textContent = `${fmt(state.exp)}/${fmt(realm.need)}`;
+  document.getElementById("miniHp").textContent = `${fmt(state.hp)}/${fmt(state.maxHp)}`;
+  document.getElementById("miniPower").textContent = fmt(state.power);
+  document.getElementById("miniGold").textContent = fmt(state.gold);
+  document.getElementById("miniStone").textContent = fmt(state.stone);
+  document.getElementById("miniReincarn").textContent = state.reincarnCount;
+
+  document.getElementById("reincarnBonus").textContent = `+${(safeNum(state.reincarnBonus) * 100).toFixed(0)}%`;
+  document.getElementById("reincarnCount").textContent = state.reincarnCount;
+  const needRealm = Math.min(REALMS.length - 1, 9 + state.reincarnCount * 9);
+  document.getElementById("reincarnNeed").textContent = REALMS[needRealm].name;
+  document.getElementById("reincarnBtn").disabled = state.realmIndex < needRealm;
+
+  document.getElementById("bossBtn1").disabled = state.isBoss || state.hp <= 0;
+  document.getElementById("bossBtn2").disabled = state.isBoss || state.hp <= 0 || state.realmIndex < 9;
+}
+
+function renderInventory() {
+  const sellBar = document.getElementById("sellBar");
+  sellBar.innerHTML = "";
+  const sellQualities = ["凡品", "灵品", "宝品", "仙品", "神品"];
+  sellQualities.forEach(q => {
+    const count = state.inventory.filter(i => i.quality === q).length;
+    const btn = document.createElement("button");
+    btn.className = "btn small";
+    btn.style.cssText = "flex:1;min-width:70px;margin-top:0;font-size:11px;padding:5px 6px;";
+    btn.textContent = `出售${q}(${count})`;
+    btn.disabled = count === 0;
+    btn.addEventListener("click", () => sellByQuality(q));
+    sellBar.appendChild(btn);
+  });
+
+  const list = document.getElementById("inventoryList");
+  list.innerHTML = "";
+  const equipped = Object.values(state.equipment).filter(Boolean);
+
+  if (state.setBonus.active) {
+    const div = document.createElement("div");
+    div.style.cssText = "background:#0e2a24;border:1px solid #2a5a4a;border-radius:6px;padding:6px 10px;margin-bottom:8px;font-size:11px;color:#6affd8;";
+    div.textContent = `★ 套装效果：[${state.setBonus.name}] ${state.setBonus.count}/3 件已激活`;
+    list.appendChild(div);
+  }
+
+  if (equipped.length > 0) {
+    const title = document.createElement("div");
+    title.style.cssText = "color:#888;font-size:11px;margin:6px 0 4px;";
+    title.textContent = "— 已装备 —";
+    list.appendChild(title);
+    equipped.forEach(item => list.appendChild(renderItemRow(item, "equipped")));
+  }
+
+  if (state.inventory.length > 0) {
+    const title = document.createElement("div");
+    title.style.cssText = "color:#888;font-size:11px;margin:8px 0 4px;";
+    title.textContent = `— 背包（${state.inventory.length}）—`;
+    list.appendChild(title);
+    const order = { "神品": 0, "仙品": 1, "宝品": 2, "灵品": 3, "凡品": 4 };
+    const sorted = [...state.inventory].sort((a, b) => order[a.quality] - order[b.quality] || b.power - a.power);
+    sorted.forEach(item => list.appendChild(renderItemRow(item, "bag")));
+  }
+
+  if (equipped.length === 0 && state.inventory.length === 0) {
+    list.innerHTML = '<div class="empty">背包空空如也</div>';
+  }
+}
+
+function renderItemRow(item, mode) {
+  const div = document.createElement("div");
+  div.className = "item " + item.quality;
+  const lvText = item.level > 0 ? ` <span class="lvup">+${item.level}</span>` : "";
+  const enhanceCost = item.enhanceCost * (item.level + 1);
+  const affixText = (item.affixes || []).map(a => a.format(safeNum(a.value))).join(" · ");
+  const affixLine = affixText ? `<div class="stat-line">${affixText}</div>` : "";
+
+  let buttons = "";
+  if (mode === "equipped") {
+    buttons = `<button data-unequip="${item.slot}">卸下</button>`;
+  } else {
+    buttons = `
+      <button data-equip="${item.id}">装备</button>
+      <button class="enhance" data-enhance="${item.id}">强化(${enhanceCost})</button>
+      <button class="sell" data-sell="${item.id}">出售</button>
+    `;
+  }
+
+  div.innerHTML = `
+    <div style="flex:1;min-width:0;">
+      <div class="name">${item.quality}·${item.name}${lvText}</div>
+      <div class="attr">${item.slotLabel} · 战力 +${item.power}</div>
+      ${affixLine}
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">${buttons}</div>
+  `;
+  return div;
+}
+
+function bindInventoryEvents() {
+  const list = document.getElementById("inventoryList");
+  list.addEventListener("click", e => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    if (btn.dataset.equip) {
+      const id = parseFloat(btn.dataset.equip);
+      const item = state.inventory.find(i => i.id === id);
+      if (item) equipItem(item);
+    } else if (btn.dataset.unequip) {
+      unequipItem(btn.dataset.unequip);
+    } else if (btn.dataset.enhance) {
+      const id = parseFloat(btn.dataset.enhance);
+      const item = state.inventory.find(i => i.id === id);
+      if (item && enhanceEquip(item)) renderInventory();
+    } else if (btn.dataset.sell) {
+      const id = parseFloat(btn.dataset.sell);
+      const item = state.inventory.find(i => i.id === id);
+      if (item) sellItem(item);
+    }
+  });
+}
+
+function renderShop() {
+  const list = document.getElementById("shopList");
+  list.innerHTML = "";
+  SHOP_ITEMS.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "shop-item";
+    div.innerHTML = `
+      <div>
+        <div class="name" style="color:#ccc;font-size:12px;">${item.name}</div>
+        <div class="attr" style="color:#888;font-size:10px;">${item.desc}</div>
+      </div>
+      <button data-buy="${index}">${item.price} 灵石</button>
+    `;
+    list.appendChild(div);
+  });
+  list.querySelectorAll("[data-buy]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const index = parseInt(btn.dataset.buy);
+      const item = SHOP_ITEMS[index];
+      if (state.gold >= item.price) {
+        state.gold -= item.price;
+        item.action();
+        updateUI();
+      } else log("灵石不足！", "danger");
+    });
+  });
+}
+
+function renderZones() {
+  const zoneSelect = document.getElementById("zoneSelect");
+  zoneSelect.innerHTML = "";
+  ZONES.forEach((zone, index) => {
+    const div = document.createElement("div");
+    div.className = "zone";
+    if (index === state.currentZone) div.classList.add("active");
+    if (state.realmIndex < zone.unlock) div.classList.add("locked");
+    div.textContent = zone.name;
+    div.title = `${zone.desc}（需要境界：${REALMS[Math.min(zone.unlock, REALMS.length - 1)].name}）`;
+    if (state.realmIndex >= zone.unlock) {
+      div.addEventListener("click", () => {
+        if (state.currentZone === index) return;
+        state.currentZone = index;
+        state.currentMonster = null;
+        state.isBoss = false;
+        log(`前往【${zone.name}】`, "rare");
+        renderZones();
+        spawnMonster();
+      });
+    }
+    zoneSelect.appendChild(div);
+  });
+}
+
+// ==================== 战斗 ====================
+function spawnMonster() {
+  const zoneMonsters = MONSTERS[state.currentZone] || MONSTERS[0];
+  const base = pick(zoneMonsters);
+  const scale = (1 + state.realmIndex * 0.25) * (1 + safeNum(state.reincarnBonus));
+  state.currentMonster = {
+    name: base.name,
+    atk: Math.floor(base.atk * scale),
+    exp: Math.floor(base.exp * scale),
+    gold: Math.floor(base.gold * scale),
+    stone: base.stone + rand(0, 1),
+    dropRate: base.dropRate,
+  };
+  state.monsterMaxHp = Math.floor(base.hp * scale);
+  state.monsterHp = state.monsterMaxHp;
+  state.isBoss = false;
+  state.bossType = null;
+}
+
+function spawnBoss(type) {
+  const boss = BOSSES[type];
+  const zoneMonsters = MONSTERS[state.currentZone] || MONSTERS[0];
+  const base = pick(zoneMonsters);
+  const scale = (1 + state.realmIndex * 0.25) * (1 + safeNum(state.reincarnBonus));
+  state.currentMonster = {
+    name: boss.name + "·" + base.name,
+    atk: Math.floor(base.atk * boss.atkMult * scale),
+    exp: Math.floor(base.exp * boss.expMult * scale),
+    gold: Math.floor(base.gold * boss.goldMult * scale),
+    stone: (base.stone + rand(1, 3)) * boss.stoneMult,
+    dropRate: boss.dropRate,
+    qualityBoost: boss.qualityBoost,
+  };
+  state.monsterMaxHp = Math.floor(base.hp * boss.hpMult * scale);
+  state.monsterHp = state.monsterMaxHp;
+  state.isBoss = true;
+  state.bossType = type === "zone" ? "区域BOSS" : "世界BOSS";
+  log(`⚔ ${state.bossType}【${state.currentMonster.name}】出现！`, "danger");
+}
+
+function fightTick() {
+  if (!state.currentMonster) { spawnMonster(); return; }
+  if (state.hp <= 0) return;
+  if (state.stamina < 5) { state.stamina = Math.min(state.maxStamina, state.stamina + 2); return; }
+  state.stamina -= 5;
+
+  const reincMult = 1 + safeNum(state.reincarnBonus);
+  let playerDamage = state.power * reincMult + rand(0, Math.floor(state.power * 0.3 * reincMult));
+  let isCrit = Math.random() < state.critRate;
+  if (isCrit) playerDamage = Math.floor(playerDamage * 2);
+
+  state.monsterHp -= playerDamage;
+
+  if (state.lifesteal > 0) {
+    const heal = Math.floor(playerDamage * state.lifesteal);
+    state.hp = Math.min(state.maxHp, state.hp + heal);
+  }
+
+  if (state.monsterHp <= 0) {
+    const m = state.currentMonster;
+    const expGain = Math.floor(m.exp * (1 + state.expBonus) * reincMult);
+    const goldGain = Math.floor(m.gold * (1 + state.goldBonus) * reincMult);
+    state.exp += expGain;
+    state.gold += goldGain;
+    state.stone += m.stone;
+    state.kills++;
+    state.sectQuestProgress++;
+
+    const critText = isCrit ? " [暴击]" : "";
+    log(`击败【${m.name}】${critText}，修为 +${fmt(expGain)}，灵石 +${fmt(goldGain)}，强化石 +${m.stone}`, isCrit ? "legend" : "");
+
+    const dropRate = Math.min(0.95, m.dropRate + state.dropBonus);
+    if (Math.random() < dropRate) {
+      const eq = generateEquip(null, m.qualityBoost || 0);
+      state.inventory.push(eq);
+      log(`✦ 掉落【${eq.quality}·${eq.name}】，战力 +${eq.power}`, eq.qualityColor);
+    }
+
+    if (state.sectQuestProgress >= state.sectQuestTarget) {
+      state.sectPoint += 10;
+      state.sectQuestProgress = 0;
+      state.sectQuestTarget = Math.min(50, state.sectQuestTarget + 5);
+      log("★ 宗门任务完成！贡献 +10", "legend");
+    }
+
+    const realm = REALMS[state.realmIndex];
+    if (state.autoBreak && state.exp >= realm.need && state.realmIndex < REALMS.length - 1) {
+      doBreak();
+    }
+
+    if (state.isBoss) {
+      state.isBoss = false;
+      state.bossType = null;
+    }
+    spawnMonster();
+  } else {
+    const monsterDamage = Math.floor(state.currentMonster.atk * (0.7 + Math.random() * 0.6));
+    state.hp -= monsterDamage;
+    if (state.hp <= 0) {
+      state.hp = state.maxHp * 0.5;
+      state.exp = Math.max(0, state.exp - Math.floor(REALMS[state.realmIndex].need * 0.05));
+      log(`你被【${state.currentMonster.name}】击倒，修为损失，气血恢复一半`, "danger");
+    }
+  }
+
+  updateUI();
+}
+
+function doBreak() {
+  const realm = REALMS[state.realmIndex];
+  if (state.exp < realm.need) return;
+  if (state.realmIndex >= REALMS.length - 1) { log("你已臻至化境，此界再无瓶颈。", "legend"); return; }
+  state.exp -= realm.need;
+  state.realmIndex++;
+  const next = REALMS[state.realmIndex];
+  state.maxHp = Math.floor((100 + state.realmIndex * 60) * (1 + state.hpBonus) * (1 + safeNum(state.reincarnBonus)));
+  state.maxStamina = 100 + state.realmIndex * 20;
+  state.hp = state.maxHp;
+  state.stamina = state.maxStamina;
+  state.basePower = next.power;
+  recalcPower();
+  log(`★ 突破成功！当前境界：${next.name}`, "legend");
+  renderZones();
+  updateUI();
+}
+
+// ==================== 转生 ====================
+function doReincarn() {
+  const needRealm = Math.min(REALMS.length - 1, 9 + state.reincarnCount * 9);
+  if (state.realmIndex < needRealm) { log("境界不足，无法转生", "danger"); return; }
+  state.reincarnCount++;
+  state.reincarnBonus = state.reincarnCount * 0.2;
+  state.realmIndex = 0;
+  state.exp = 0;
+  state.hp = 100;
+  state.maxHp = 100;
+  state.stamina = 100;
+  state.maxStamina = 100;
+  state.basePower = 10;
+  state.totalEquipBonus = 0;
+  state.power = 10;
+  state.critRate = 0.05;
+  state.lifesteal = 0;
+  state.gold = 0;
+  state.stone = 0;
+  state.kills = 0;
+  state.inventory = [];
+  state.equipment = { weapon: null, armor: null, accessory: null };
+  state.currentZone = 0;
+  state.currentMonster = null;
+  state.isBoss = false;
+  state.sectQuestProgress = 0;
+  state.sectQuestTarget = 5;
+  recalcPower();
+  spawnMonster();
+  renderZones();
+  renderInventory();
+  updateUI();
+  log(`★★★ 转生成功！当前转生 ${state.reincarnCount} 次，永久加成 +${(state.reincarnBonus*100).toFixed(0)}%`, "myth");
+}
+
+// ==================== 恢复 ====================
+function regenLoop() {
+  if (state.hp < state.maxHp) state.hp = Math.min(state.maxHp, state.hp + state.maxHp * 0.02);
+  if (state.stamina < state.maxStamina) state.stamina = Math.min(state.maxStamina, state.stamina + 8);
+  updateUI();
+}
+
+// ==================== 存档 ====================
+function saveGame() {
+  state.exp = Math.max(0, safeNum(state.exp));
+  state.gold = Math.max(0, safeNum(state.gold));
+  state.stone = Math.max(0, safeNum(state.stone));
+  state.hp = Math.max(0, safeNum(state.hp));
+  state.stamina = Math.max(0, safeNum(state.stamina));
+  state.kills = Math.max(0, safeNum(state.kills));
+  state.sectPoint = Math.max(0, safeNum(state.sectPoint));
+  state.monsterHp = safeNum(state.monsterHp);
+  state.monsterMaxHp = safeNum(state.monsterMaxHp, 1);
+  localStorage.setItem("xiuxian_arpg_save", JSON.stringify(state));
+  localStorage.setItem("xiuxian_arpg_time", Date.now());
+  scheduleCloudSave();
+}
+
+function loadGame() {
+  const saved = localStorage.getItem("xiuxian_arpg_save");
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      Object.assign(state, data);
+      state.exp = Math.max(0, safeNum(state.exp));
+      state.gold = Math.max(0, safeNum(state.gold));
+      state.stone = Math.max(0, safeNum(state.stone));
+      state.hp = Math.max(0, safeNum(state.hp));
+      state.maxHp = Math.max(100, safeNum(state.maxHp, 100));
+      state.stamina = Math.max(0, safeNum(state.stamina));
+      state.maxStamina = Math.max(100, safeNum(state.maxStamina, 100));
+      state.kills = Math.max(0, safeNum(state.kills));
+      state.sectPoint = Math.max(0, safeNum(state.sectPoint));
+      state.reincarnCount = Math.max(0, safeNum(state.reincarnCount));
+      state.reincarnBonus = Math.max(0, safeNum(state.reincarnBonus));
+      state.realmIndex = Math.max(0, Math.min(REALMS.length - 1, safeNum(state.realmIndex)));
+      state.currentZone = Math.max(0, Math.min(ZONES.length - 1, safeNum(state.currentZone)));
+      state.inventory = Array.isArray(state.inventory) ? state.inventory : [];
+      state.equipment = state.equipment || { weapon: null, armor: null, accessory: null };
+      recalcPower();
+    } catch (e) { console.warn("存档读取失败"); }
+  }
+}
+
+function offlineEarnings() {
+  const last = localStorage.getItem("xiuxian_arpg_time");
+  const now = Date.now();
+  if (last) {
+    const lastTs = parseInt(last, 10);
+    if (!isNaN(lastTs) && lastTs > 0) {
+      const diff = Math.floor((now - lastTs) / 1000);
+      if (diff > 60 && diff < 86400 * 7) {
+        const minutes = Math.floor(diff / 60);
+        const realm = REALMS[state.realmIndex];
+        const expGain = Math.min(minutes * Math.floor(realm.need * 0.001) + 1, Math.floor(realm.need * 0.5));
+        const goldGain = Math.min(minutes * 5, 50000);
+        const stoneGain = Math.min(minutes * 2, 10000);
+        state.exp += safeNum(expGain);
+        state.gold += safeNum(goldGain);
+        state.stone += safeNum(stoneGain);
+        log(`离线 ${minutes} 分钟，获得修为 +${fmt(expGain)}，灵石 +${fmt(goldGain)}，强化石 +${fmt(stoneGain)}`, "gold");
+      }
+    }
+  }
+  localStorage.setItem("xiuxian_arpg_time", now);
+}
+
+function resetGame() {
+  if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
+  localStorage.removeItem("xiuxian_arpg_save");
+  localStorage.removeItem("xiuxian_arpg_time");
+  location.reload();
+}
+
+// ==================== 事件 ====================
+document.getElementById("breakBtn").addEventListener("click", () => {
+  state.autoBreak = !state.autoBreak;
+  if (state.autoBreak) doBreak();
+  updateUI();
+});
+
+document.getElementById("toggleBtn").addEventListener("click", () => {
+  document.getElementById("app").classList.toggle("mini");
+  document.getElementById("toggleBtn").textContent =
+    document.getElementById("app").classList.contains("mini") ? "展开模式" : "迷你模式";
+});
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
+    if (tab.dataset.tab === "inventory") renderInventory();
+    if (tab.dataset.tab === "shop") renderShop();
+  });
+});
+
+document.getElementById("sectTaskBtn").addEventListener("click", () => {
+  if (state.sectPoint >= 20) { state.sectPoint -= 20; state.sectQuestTarget += 5; log("接取高级宗门任务，目标提升", "rare"); }
+  else log("宗门贡献不足（需要 20）", "danger");
+  updateUI();
+});
+
+document.getElementById("sectUpgradeBtn").addEventListener("click", () => {
+  if (state.sectPoint >= 30) { state.sectPoint -= 30; state.basePower += 15; recalcPower(); log("消耗 30 宗门贡献，基础战力 +15", "epic"); }
+  else log("宗门贡献不足（需要 30）", "danger");
+  updateUI();
+});
+
+document.getElementById("bossBtn1").addEventListener("click", () => spawnBoss("zone"));
+document.getElementById("bossBtn2").addEventListener("click", () => spawnBoss("world"));
+
+document.getElementById("reincarnBtn").addEventListener("click", doReincarn);
+document.getElementById("resetBtn").addEventListener("click", resetGame);
+
+// ==================== 启动 ====================
+async function init() {
+  loadGame();
+  await cloudLoad();
+  offlineEarnings();
+  bindInventoryEvents();
+  log("你于洞府中睁开双眼，开始了偷偷摸摸的修仙之路……");
+  log("提示：每个大境界分九层，修为需求指数级增长，越往后越难。", "rare");
+  spawnMonster();
+  renderZones();
+  renderInventory();
+  renderShop();
+  updateUI();
+
+  setInterval(fightTick, 1000);
+  setInterval(regenLoop, 2000);
+  setInterval(saveGame, 10000);
+  window.addEventListener("beforeunload", saveGame);
+}
+
+init();
+</script>
+</body>
+</html>
