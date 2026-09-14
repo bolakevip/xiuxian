@@ -7,289 +7,131 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: #0a0a0e;
-    color: #d4d4d4;
+    background: #0a0a0e; color: #d4d4d4;
     font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 20px;
-    user-select: none;
+    display: flex; justify-content: center; align-items: flex-start;
+    min-height: 100vh; padding: 20px; user-select: none;
   }
   #app {
-    width: 440px;
-    background: #14141a;
-    border: 1px solid #2a2a35;
-    border-radius: 12px;
-    padding: 14px;
+    width: 440px; background: #14141a;
+    border: 1px solid #2a2a35; border-radius: 12px; padding: 14px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.8);
     transition: width 0.3s, padding 0.3s;
   }
-  .title {
-    font-size: 15px;
-    color: #c586c0;
-    text-align: center;
-    margin-bottom: 10px;
-    letter-spacing: 3px;
-    font-weight: bold;
-  }
-  .tabs {
-    display: flex;
-    gap: 3px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-  }
+  .title { font-size: 15px; color: #c586c0; text-align: center; margin-bottom: 10px; letter-spacing: 3px; font-weight: bold; }
+  .tabs { display: flex; gap: 3px; margin-bottom: 10px; flex-wrap: wrap; }
   .tab {
-    flex: 1;
-    min-width: 52px;
-    text-align: center;
-    padding: 6px 0;
-    font-size: 11px;
-    background: #1f1f28;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #777;
-    transition: all 0.2s;
+    flex: 1; min-width: 48px; text-align: center; padding: 6px 0; font-size: 11px;
+    background: #1f1f28; border-radius: 6px; cursor: pointer; color: #777; transition: all 0.2s;
   }
   .tab.active { background: #0e639c; color: #fff; }
   .tab:hover:not(.active) { background: #2a2a35; color: #ccc; }
-
   .panel { display: none; }
   .panel.active { display: block; }
-
-  .row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    margin: 5px 0;
-    color: #9cdcfe;
-  }
+  .row { display: flex; justify-content: space-between; font-size: 12px; margin: 5px 0; color: #9cdcfe; }
   .row span:last-child { color: #ce9178; font-weight: bold; }
-  .bar-bg {
-    height: 10px;
-    background: #1f1f28;
-    border-radius: 5px;
-    overflow: hidden;
-    margin: 4px 0 10px;
-  }
-  .bar-fill {
-    height: 100%;
-    width: 0%;
-    transition: width 0.3s;
-    border-radius: 5px;
-  }
+  .bar-bg { height: 10px; background: #1f1f28; border-radius: 5px; overflow: hidden; margin: 4px 0 10px; }
+  .bar-fill { height: 100%; width: 0%; transition: width 0.3s; border-radius: 5px; }
   #hpFill { background: linear-gradient(90deg, #f14c4c, #ff8c8c); }
   #expFill { background: linear-gradient(90deg, #4ec9b0, #6affd8); }
   #staminaFill { background: linear-gradient(90deg, #dcdcaa, #fff8a8); }
   #monsterHpFill { background: linear-gradient(90deg, #c586c0, #ff9de0); }
-
-  .battle-box {
-    background: #0e0e12;
-    border: 1px solid #2a2a35;
-    border-radius: 8px;
-    padding: 10px;
-    margin-top: 8px;
-  }
-  .battle-title {
-    font-size: 12px;
-    color: #c586c0;
-    margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-  }
+  .battle-box { background: #0e0e12; border: 1px solid #2a2a35; border-radius: 8px; padding: 10px; margin-top: 8px; }
+  .battle-title { font-size: 12px; color: #c586c0; margin-bottom: 6px; display: flex; justify-content: space-between; }
   .battle-title .lvl { color: #ffd700; font-size: 11px; }
   .battle-title .boss-tag { color: #ff6b6b; font-weight: bold; }
-
   #log {
-    height: 120px;
-    overflow-y: auto;
-    background: #0e0e12;
-    border: 1px solid #2a2a35;
-    border-radius: 6px;
-    padding: 8px;
-    font-size: 11px;
-    line-height: 1.7;
-    color: #808080;
-    margin-top: 8px;
+    height: 120px; overflow-y: auto; background: #0e0e12; border: 1px solid #2a2a35;
+    border-radius: 6px; padding: 8px; font-size: 11px; line-height: 1.7; color: #808080; margin-top: 8px;
   }
   #log div { margin-bottom: 2px; }
   #log::-webkit-scrollbar { width: 4px; }
   #log::-webkit-scrollbar-thumb { background: #3a3a48; border-radius: 2px; }
-
-  .rare   { color: #4ec9b0; }
-  .epic   { color: #c586c0; }
-  .legend { color: #dcdcaa; font-weight: bold; }
-  .danger { color: #f14c4c; }
-  .gold   { color: #ffd700; }
-  .myth   { color: #ff6b6b; font-weight: bold; text-shadow: 0 0 6px #ff6b6b; }
-  .gem    { color: #66d9ff; font-weight: bold; }
-  .book   { color: #ffaa00; font-weight: bold; }
-
+  .rare { color: #4ec9b0; } .epic { color: #c586c0; } .legend { color: #dcdcaa; font-weight: bold; }
+  .danger { color: #f14c4c; } .gold { color: #ffd700; }
+  .myth { color: #ff6b6b; font-weight: bold; text-shadow: 0 0 6px #ff6b6b; }
+  .gem { color: #66d9ff; font-weight: bold; }
+  .book { color: #ffaa00; font-weight: bold; }
+  .pet { color: #a0ffaa; font-weight: bold; }
+  .talent { color: #ff8cff; font-weight: bold; }
   .btn {
-    width: 100%;
-    margin-top: 8px;
-    padding: 8px;
-    background: #0e639c;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: background 0.2s;
+    width: 100%; margin-top: 8px; padding: 8px; background: #0e639c; color: #fff;
+    border: none; border-radius: 6px; cursor: pointer; font-size: 12px; transition: background 0.2s;
   }
   .btn:hover:not(:disabled) { background: #1177bb; }
   .btn:disabled { background: #222; cursor: not-allowed; color: #555; }
   .btn.small { padding: 5px; font-size: 11px; margin-top: 4px; }
-  .btn.gold { background: #8a6d0a; }
-  .btn.gold:hover:not(:disabled) { background: #b08a0e; }
-  .btn.danger { background: #8a2a2a; }
-  .btn.danger:hover:not(:disabled) { background: #b03a3a; }
-  .btn.skill { background: #7a3d9c; }
-  .btn.skill:hover:not(:disabled) { background: #9b4dc4; }
-  .btn.skill.cd { background: #333; color: #666; }
-
+  .btn.gold { background: #8a6d0a; } .btn.gold:hover:not(:disabled) { background: #b08a0e; }
+  .btn.danger { background: #8a2a2a; } .btn.danger:hover:not(:disabled) { background: #b03a3a; }
+  .btn.pet { background: #2a7a3a; } .btn.pet:hover:not(:disabled) { background: #3a9a4a; }
   .item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 10px;
-    background: #1a1a22;
-    border-radius: 6px;
-    margin-bottom: 5px;
-    font-size: 11px;
-    border-left: 3px solid #444;
-    gap: 8px;
-    flex-wrap: wrap;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 10px; background: #1a1a22; border-radius: 6px; margin-bottom: 5px;
+    font-size: 11px; border-left: 3px solid #444; gap: 8px; flex-wrap: wrap;
   }
   .item.灵品 { border-left-color: #4ec9b0; }
   .item.宝品 { border-left-color: #c586c0; }
   .item.仙品 { border-left-color: #dcdcaa; }
   .item.神品 { border-left-color: #ff6b6b; box-shadow: 0 0 8px rgba(255,107,107,0.25); }
   .item.book { border-left-color: #ffaa00; background: #1f1a0e; }
+  .item.pet { border-left-color: #a0ffaa; background: #0e1f12; }
   .item .name { color: #ccc; font-size: 12px; }
   .item .attr { color: #888; font-size: 10px; margin-top: 2px; }
   .item .lvup { color: #4ec9b0; font-size: 10px; }
   .item .stat-line { color: #6affd8; font-size: 10px; margin-top: 1px; }
   .item .gem-line { color: #66d9ff; font-size: 10px; margin-top: 1px; }
   .item .book-line { color: #ffaa00; font-size: 10px; margin-top: 1px; }
+  .item .pet-line { color: #a0ffaa; font-size: 10px; margin-top: 1px; }
   .item button {
-    background: #0e639c;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 9px;
-    font-size: 10px;
-    cursor: pointer;
-    white-space: nowrap;
+    background: #0e639c; color: #fff; border: none; border-radius: 4px;
+    padding: 4px 9px; font-size: 10px; cursor: pointer; white-space: nowrap;
   }
   .item button:hover { background: #1177bb; }
   .item button.enhance { background: #7a3d9c; }
-  .item button.enhance:hover { background: #9b4dc4; }
   .item button.sell { background: #8a3a3a; }
-  .item button.sell:hover { background: #b04a4a; }
   .item button.gem { background: #1a6a8a; }
-  .item button.gem:hover { background: #2288b0; }
-  .item button.learn { background: #8a6d0a; }
-  .item button.learn:hover { background: #b08a0e; }
+  .item button.pet { background: #2a7a3a; }
   .empty { color: #555; text-align: center; padding: 20px; font-size: 12px; }
-
   .toggle {
-    position: fixed;
-    top: 12px;
-    right: 12px;
-    background: #1f1f28;
-    color: #ccc;
-    border: 1px solid #3a3a48;
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    z-index: 100;
+    position: fixed; top: 12px; right: 12px; background: #1f1f28; color: #ccc;
+    border: 1px solid #3a3a48; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; z-index: 100;
   }
   .toggle:hover { background: #2a2a35; }
-
-  .mini #log, .mini .bar-bg, .mini .tabs, .mini .panel,
-  .mini .btn, .mini #inventoryList, .mini #shopList,
-  .mini .battle-box, .mini #sellBar, .mini .gem-bar,
-  .mini .sign-bar, .mini .skill-bar { display: none; }
+  .mini #log, .mini .bar-bg, .mini .tabs, .mini .panel, .mini .btn,
+  .mini #inventoryList, .mini #shopList, .mini .battle-box, .mini #sellBar,
+  .mini .gem-bar, .mini .sign-bar, .mini .skill-bar { display: none; }
   .mini .mini-info { display: block; }
   .mini { width: 210px; padding: 10px; }
   .mini-info { display: none; }
   .mini-info .row { margin: 3px 0; font-size: 11px; }
-
   .shop-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 10px;
-    background: #1a1a22;
-    border-radius: 6px;
-    margin-bottom: 5px;
-    font-size: 11px;
-    gap: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 10px; background: #1a1a22; border-radius: 6px; margin-bottom: 5px; font-size: 11px; gap: 8px;
   }
   .shop-item .price { color: #ffd700; }
   .shop-item button {
-    background: #0e639c;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 9px;
-    font-size: 10px;
-    cursor: pointer;
-    white-space: nowrap;
+    background: #0e639c; color: #fff; border: none; border-radius: 4px;
+    padding: 4px 9px; font-size: 10px; cursor: pointer; white-space: nowrap;
   }
-
-  .zone-select {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-  }
+  .zone-select { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
   .zone {
-    flex: 1;
-    min-width: 60px;
-    text-align: center;
-    padding: 5px 4px;
-    font-size: 11px;
-    background: #1f1f28;
-    border-radius: 5px;
-    cursor: pointer;
-    color: #777;
-    border: 1px solid transparent;
-    transition: all 0.2s;
+    flex: 1; min-width: 60px; text-align: center; padding: 5px 4px; font-size: 11px;
+    background: #1f1f28; border-radius: 5px; cursor: pointer; color: #777;
+    border: 1px solid transparent; transition: all 0.2s;
   }
   .zone.active { background: #2d4a2d; color: #8fd98f; border-color: #4a7a4a; }
   .zone.locked { opacity: 0.35; cursor: not-allowed; }
   .zone:hover:not(.active):not(.locked) { background: #2a2a35; color: #ccc; }
-
-  .boss-row {
-    display: flex;
-    gap: 5px;
-    margin-top: 6px;
-  }
+  .boss-row { display: flex; gap: 5px; margin-top: 6px; }
   .boss-btn {
-    flex: 1;
-    padding: 6px;
-    background: #3a1a1a;
-    border: 1px solid #6a2a2a;
-    border-radius: 6px;
-    color: #ff8c8c;
-    font-size: 11px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
+    flex: 1; padding: 6px; background: #3a1a1a; border: 1px solid #6a2a2a; border-radius: 6px;
+    color: #ff8c8c; font-size: 11px; cursor: pointer; text-align: center; transition: all 0.2s;
   }
   .boss-btn:hover:not(:disabled) { background: #5a2a2a; color: #ffb0b0; }
   .boss-btn:disabled { background: #1a1a22; color: #555; border-color: #2a2a35; cursor: not-allowed; }
-
   .reincarn-box {
-    background: #1a1a22;
-    border: 1px solid #3a3a48;
-    border-radius: 8px;
-    padding: 12px;
-    text-align: center;
+    background: #1a1a22; border: 1px solid #3a3a48; border-radius: 8px;
+    padding: 12px; text-align: center;
   }
   .reincarn-box h3 { color: #ffd700; font-size: 13px; margin-bottom: 8px; }
   .reincarn-box p { color: #888; font-size: 11px; margin-bottom: 10px; line-height: 1.6; }
@@ -297,121 +139,70 @@
   .sync-status { font-size: 11px; text-align: center; margin-top: 4px; color: #888; }
   .sync-status.ok { color: #4ec9b0; }
   .sync-status.err { color: #f14c4c; }
-
-  .sign-bar {
-    background: #1a1a22;
-    border: 1px solid #3a3a48;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-  }
+  .sign-bar { background: #1a1a22; border: 1px solid #3a3a48; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
   .sign-bar h3 { color: #ffd700; font-size: 12px; margin-bottom: 6px; }
   .sign-bar p { color: #888; font-size: 11px; margin-bottom: 8px; }
-  .sign-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 3px;
-    margin-bottom: 8px;
-  }
+  .sign-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 8px; }
   .sign-day {
-    background: #0e0e12;
-    border: 1px solid #2a2a35;
-    border-radius: 4px;
-    padding: 5px 2px;
-    text-align: center;
-    font-size: 10px;
-    color: #666;
+    background: #0e0e12; border: 1px solid #2a2a35; border-radius: 4px;
+    padding: 5px 2px; text-align: center; font-size: 10px; color: #666;
   }
   .sign-day.done { background: #1a3a2a; border-color: #2a5a4a; color: #6affd8; }
   .sign-day.today { background: #3a2a0a; border-color: #6a4a1a; color: #ffd700; font-weight: bold; }
-
-  .skill-bar {
-    display: flex;
-    gap: 4px;
-    margin-top: 8px;
-  }
+  .skill-bar { display: flex; gap: 4px; margin-top: 8px; }
   .skill-btn {
-    flex: 1;
-    padding: 8px 4px;
-    background: #3a1a4a;
-    border: 1px solid #6a2a8a;
-    border-radius: 6px;
-    color: #c586c0;
-    font-size: 11px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
+    flex: 1; padding: 8px 4px; background: #3a1a4a; border: 1px solid #6a2a8a; border-radius: 6px;
+    color: #c586c0; font-size: 11px; cursor: pointer; text-align: center; transition: all 0.2s;
   }
   .skill-btn:hover:not(:disabled) { background: #5a2a6a; color: #e0a0e0; }
   .skill-btn:disabled { background: #1a1a22; color: #555; border-color: #2a2a35; cursor: not-allowed; }
-
   .skill-item {
-    background: #1a1a22;
-    border-radius: 6px;
-    padding: 8px 10px;
-    margin-bottom: 6px;
-    font-size: 11px;
-    border-left: 3px solid #c586c0;
+    background: #1a1a22; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px;
+    font-size: 11px; border-left: 3px solid #c586c0;
   }
   .skill-item .name { color: #c586c0; font-size: 12px; font-weight: bold; }
   .skill-item .desc { color: #888; font-size: 10px; margin-top: 2px; }
   .skill-item .lv { color: #ffd700; font-size: 10px; margin-top: 2px; }
   .skill-item button {
-    background: #7a3d9c;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 9px;
-    font-size: 10px;
-    cursor: pointer;
-    margin-top: 4px;
+    background: #7a3d9c; color: #fff; border: none; border-radius: 4px;
+    padding: 4px 9px; font-size: 10px; cursor: pointer; margin-top: 4px;
   }
   .skill-item button:hover { background: #9b4dc4; }
   .skill-item button:disabled { background: #333; color: #666; cursor: not-allowed; }
-
-  .sub-tabs {
-    display: flex;
-    gap: 3px;
-    margin-bottom: 8px;
-  }
+  .sub-tabs { display: flex; gap: 3px; margin-bottom: 8px; }
   .sub-tab {
-    flex: 1;
-    text-align: center;
-    padding: 5px 0;
-    font-size: 11px;
-    background: #1f1f28;
-    border-radius: 5px;
-    cursor: pointer;
-    color: #777;
+    flex: 1; text-align: center; padding: 5px 0; font-size: 11px;
+    background: #1f1f28; border-radius: 5px; cursor: pointer; color: #777;
   }
   .sub-tab.active { background: #0e639c; color: #fff; }
-
   .sect-card {
-    background: #1a1a22;
-    border: 1px solid #3a3a48;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 8px;
-    text-align: center;
+    background: #1a1a22; border: 1px solid #3a3a48; border-radius: 8px;
+    padding: 10px; margin-bottom: 8px; text-align: center;
   }
   .sect-card.selected { border-color: #ffd700; background: #1f1a0e; }
   .sect-card h4 { color: #ffd700; font-size: 13px; margin-bottom: 4px; }
   .sect-card p { color: #888; font-size: 11px; margin-bottom: 6px; line-height: 1.5; }
   .sect-card button {
-    background: #0e639c;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 12px;
-    font-size: 11px;
-    cursor: pointer;
+    background: #0e639c; color: #fff; border: none; border-radius: 4px;
+    padding: 5px 12px; font-size: 11px; cursor: pointer;
   }
   .sect-card button:hover { background: #1177bb; }
   .sect-card button:disabled { background: #333; color: #666; cursor: not-allowed; }
+  .talent-tree { display: flex; gap: 6px; margin-top: 8px; }
+  .talent-branch {
+    flex: 1; background: #1a1a22; border: 1px solid #3a3a48; border-radius: 8px; padding: 8px;
+  }
+  .talent-branch h4 { font-size: 12px; margin-bottom: 6px; text-align: center; }
+  .talent-branch .node {
+    background: #0e0e12; border: 1px solid #2a2a35; border-radius: 5px;
+    padding: 6px; margin-bottom: 5px; font-size: 10px; text-align: center; cursor: pointer;
+  }
+  .talent-branch .node:hover:not(.locked) { border-color: #ff8cff; }
+  .talent-branch .node.maxed { background: #2a1a2a; border-color: #7a3d9c; color: #c586c0; }
+  .talent-branch .node.locked { opacity: 0.4; cursor: not-allowed; }
 </style>
 </head>
 <body>
-
 <div id="app">
   <div class="title">偷偷摸摸修个仙 · ARPG</div>
 
@@ -423,11 +214,13 @@
     <div class="row"><span>灵石</span><span id="miniGold">0</span></div>
     <div class="row"><span>强化石</span><span id="miniStone">0</span></div>
     <div class="row"><span>转生</span><span id="miniReincarn">0</span></div>
+    <div class="row"><span>天赋点</span><span id="miniTalent">0</span></div>
   </div>
 
   <div class="tabs">
     <div class="tab active" data-tab="cultivate">修炼</div>
     <div class="tab" data-tab="inventory">背包</div>
+    <div class="tab" data-tab="pet">灵兽</div>
     <div class="tab" data-tab="skill">功法</div>
     <div class="tab" data-tab="shop">商店</div>
     <div class="tab" data-tab="sect">宗门</div>
@@ -445,10 +238,8 @@
     <div class="row"><span>境界</span><span id="realm">炼气一层</span></div>
     <div class="row"><span>修为</span><span id="expText">0 / 10</span></div>
     <div class="bar-bg"><div class="bar-fill" id="expFill"></div></div>
-
     <div class="row"><span>气血</span><span id="hpText">100 / 100</span></div>
     <div class="bar-bg"><div class="bar-fill" id="hpFill"></div></div>
-
     <div class="row"><span>体力</span><span id="staminaText">100 / 100</span></div>
     <div class="bar-bg"><div class="bar-fill" id="staminaFill"></div></div>
 
@@ -458,6 +249,9 @@
     <div class="row"><span>强化石</span><span id="stone">0</span></div>
     <div class="row"><span>击杀</span><span id="kills">0</span></div>
     <div class="row"><span>流派</span><span id="currentSect">未入门</span></div>
+    <div class="row"><span>功法点</span><span id="skillPoints">0</span></div>
+    <div class="row"><span>天赋点</span><span id="talentPoints">0</span></div>
+    <div class="row"><span>出战灵兽</span><span id="activePetName">无</span></div>
 
     <div class="battle-box">
       <div class="battle-title">
@@ -469,18 +263,22 @@
     </div>
 
     <div class="zone-select" id="zoneSelect"></div>
-
     <div class="boss-row" id="bossRow">
       <button class="boss-btn" id="bossBtn1" disabled>区域BOSS</button>
       <button class="boss-btn" id="bossBtn2" disabled>世界BOSS</button>
     </div>
-
     <div class="skill-bar" id="skillBar"></div>
   </div>
 
   <div class="panel" id="panel-inventory">
     <div id="sellBar" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;"></div>
     <div id="inventoryList"><div class="empty">背包空空如也</div></div>
+  </div>
+
+  <div class="panel" id="panel-pet">
+    <div class="row"><span>出战灵兽</span><span id="petActiveName">无</span></div>
+    <div class="row"><span>灵兽数量</span><span id="petCount">0</span></div>
+    <div id="petList"></div>
   </div>
 
   <div class="panel" id="panel-skill">
@@ -492,6 +290,7 @@
     <div class="sub-tabs">
       <div class="sub-tab active" data-sub="normal">普通商店</div>
       <div class="sub-tab" data-sub="gem">宝石商店</div>
+      <div class="sub-tab" data-sub="pet">灵兽商店</div>
     </div>
     <div id="shopList"></div>
   </div>
@@ -505,28 +304,37 @@
       <div class="row"><span>选择流派</span><span></span></div>
       <div id="sectSelect"></div>
     </div>
+    <div style="margin-top:12px;">
+      <div class="row"><span>技能阁（用贡献兑换技能书）</span><span></span></div>
+      <div id="skillShop"></div>
+    </div>
   </div>
 
   <div class="panel" id="panel-reincarn">
     <div class="reincarn-box">
       <h3>转生系统</h3>
-      <p>转生将重置境界、装备、灵石，但永久保留转生加成。<br>每次转生永久提升 <b>20%</b> 全属性。</p>
+      <p>转生将重置境界、装备、灵石，但永久保留转生加成与天赋。<br>每次转生永久提升 <b>20%</b> 全属性，并获得 <b>3</b> 天赋点。</p>
       <div class="big" id="reincarnBonus">+0%</div>
       <div class="row" style="justify-content:center;gap:20px;">
         <span>转生次数：<b id="reincarnCount">0</b></span>
         <span>需求境界：<b id="reincarnNeed">筑基一层</b></span>
       </div>
+      <div class="row" style="justify-content:center;gap:20px;">
+        <span>剩余天赋点：<b id="talentPoints2">0</b></span>
+      </div>
       <button class="btn gold" id="reincarnBtn" disabled>转生</button>
       <button class="btn danger" id="resetBtn">清空存档，重新开始</button>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="row"><span>转生天赋树</span><span></span></div>
+      <div class="talent-tree" id="talentTree"></div>
     </div>
   </div>
 
   <div id="log"></div>
-
   <div class="sync-status" id="syncStatus">云端存档：初始化中…</div>
   <button class="btn" id="breakBtn" disabled>突破境界</button>
 </div>
-
 <button class="toggle" id="toggleBtn">迷你模式</button>
 
 <script>
@@ -538,48 +346,79 @@ const SECTS = [
   { key: "mo",   name: "魔修", desc: "高吸血、高掉宝。技能：血魔功（回血+30%攻击5秒）", skill: "血魔功", cd: 30 },
 ];
 
-// ==================== 技能书定义（按境界分级）====================
+// ==================== 技能书 ====================
 const SKILL_BOOKS = [
-  // 炼气期（境界 0-8）
   { key: "b1", name: "基础剑法", realm: 0, price: 50,  effect: { power: 0.05 }, desc: "战力 +5%（可升级）" },
   { key: "b2", name: "聚气术",   realm: 0, price: 50,  effect: { exp: 0.05 },   desc: "修为 +5%（可升级）" },
   { key: "b3", name: "铁布衫",   realm: 0, price: 80,  effect: { hp: 0.08 },    desc: "气血 +8%（可升级）" },
-  // 筑基期（境界 9-17）
   { key: "b4", name: "御剑术",   realm: 9, price: 200, effect: { crit: 0.03 },  desc: "暴击 +3%（可升级）" },
   { key: "b5", name: "御灵术",   realm: 9, price: 200, effect: { lifesteal: 0.02 }, desc: "吸血 +2%（可升级）" },
   { key: "b6", name: "护体金光", realm: 9, price: 250, effect: { hp: 0.12 },    desc: "气血 +12%（可升级）" },
-  // 金丹期（境界 18-26）
   { key: "b7", name: "万剑诀",   realm: 18, price: 500, effect: { power: 0.10 }, desc: "战力 +10%（可升级）" },
   { key: "b8", name: "天雷咒",   realm: 18, price: 500, effect: { crit: 0.05 },  desc: "暴击 +5%（可升级）" },
   { key: "b9", name: "血魔功",   realm: 18, price: 600, effect: { lifesteal: 0.04 }, desc: "吸血 +4%（可升级）" },
-  // 元婴期（境界 27-35）
   { key: "b10", name: "剑破虚空", realm: 27, price: 1200, effect: { power: 0.15 }, desc: "战力 +15%（可升级）" },
   { key: "b11", name: "五雷正法", realm: 27, price: 1200, effect: { crit: 0.08 },  desc: "暴击 +8%（可升级）" },
   { key: "b12", name: "不死金身", realm: 27, price: 1500, effect: { hp: 0.20 },    desc: "气血 +20%（可升级）" },
-  // 化神期（境界 36+）
   { key: "b13", name: "大五行剑", realm: 36, price: 3000, effect: { power: 0.25 }, desc: "战力 +25%（可升级）" },
   { key: "b14", name: "九天神雷", realm: 36, price: 3000, effect: { crit: 0.12 },  desc: "暴击 +12%（可升级）" },
   { key: "b15", name: "混沌魔功", realm: 36, price: 3500, effect: { lifesteal: 0.08 }, desc: "吸血 +8%（可升级）" },
 ];
 
-// ==================== 宝石定义 ====================
+// ==================== 宝石 ====================
 const GEMS = [
-  { key: "ruby",    name: "红宝石",   color: "#ff6b6b", attr: "atk",       value: 0.05, desc: "战力 +5%/颗" },
-  { key: "sapphire",name: "蓝宝石",   color: "#66d9ff", attr: "crit",      value: 0.02, desc: "暴击 +2%/颗" },
-  { key: "emerald", name: "绿宝石",   color: "#6affd8", attr: "lifesteal", value: 0.01, desc: "吸血 +1%/颗" },
-  { key: "topaz",   name: "黄玉",     color: "#ffd700", attr: "gold",      value: 0.05, desc: "灵石 +5%/颗" },
-  { key: "amethyst",name: "紫晶",     color: "#c586c0", attr: "exp",       value: 0.03, desc: "修为 +3%/颗" },
-  { key: "diamond", name: "钻石",     color: "#ffffff", attr: "drop",      value: 0.02, desc: "掉宝 +2%/颗" },
+  { key: "ruby",    name: "红宝石", color: "#ff6b6b", attr: "atk",       value: 0.05, desc: "战力 +5%/颗" },
+  { key: "sapphire",name: "蓝宝石", color: "#66d9ff", attr: "crit",      value: 0.02, desc: "暴击 +2%/颗" },
+  { key: "emerald", name: "绿宝石", color: "#6affd8", attr: "lifesteal", value: 0.01, desc: "吸血 +1%/颗" },
+  { key: "topaz",   name: "黄玉",   color: "#ffd700", attr: "gold",      value: 0.05, desc: "灵石 +5%/颗" },
+  { key: "amethyst",name: "紫晶",   color: "#c586c0", attr: "exp",       value: 0.03, desc: "修为 +3%/颗" },
+  { key: "diamond", name: "钻石",   color: "#ffffff", attr: "drop",      value: 0.02, desc: "掉宝 +2%/颗" },
 ];
 
-// ==================== 功法定义 ====================
+// ==================== 功法 ====================
 const SKILLS = [
-  { key: "yujian",   name: "御剑术",   desc: "战力 +10%/级",     maxLv: 10, cost: 1, effect: { power: 0.10 } },
-  { key: "guixi",    name: "龟息功",   desc: "气血 +15%/级",     maxLv: 10, cost: 1, effect: { hp: 0.15 } },
-  { key: "xixing",   name: "吸星大法", desc: "吸血 +3%/级",      maxLv: 10, cost: 2, effect: { lifesteal: 0.03 } },
-  { key: "poyun",    name: "破云式",   desc: "暴击 +3%/级",      maxLv: 10, cost: 2, effect: { crit: 0.03 } },
-  { key: "juling",   name: "聚灵诀",   desc: "修为 +5%/级",      maxLv: 10, cost: 1, effect: { exp: 0.05 } },
-  { key: "caiyun",   name: "财运诀",   desc: "灵石 +8%/级",      maxLv: 10, cost: 1, effect: { gold: 0.08 } },
+  { key: "yujian",   name: "御剑术",   desc: "战力 +10%/级", maxLv: 10, cost: 1, effect: { power: 0.10 } },
+  { key: "guixi",    name: "龟息功",   desc: "气血 +15%/级", maxLv: 10, cost: 1, effect: { hp: 0.15 } },
+  { key: "xixing",   name: "吸星大法", desc: "吸血 +3%/级",  maxLv: 10, cost: 2, effect: { lifesteal: 0.03 } },
+  { key: "poyun",    name: "破云式",   desc: "暴击 +3%/级",  maxLv: 10, cost: 2, effect: { crit: 0.03 } },
+  { key: "juling",   name: "聚灵诀",   desc: "修为 +5%/级",  maxLv: 10, cost: 1, effect: { exp: 0.05 } },
+  { key: "caiyun",   name: "财运诀",   desc: "灵石 +8%/级",  maxLv: 10, cost: 1, effect: { gold: 0.08 } },
+];
+
+// ==================== 宠物/灵兽 ====================
+const PET_QUALITY = [
+  { name: "凡兽", color: "#888",    mult: 1.0, price: 100 },
+  { name: "灵兽", color: "#4ec9b0", mult: 1.8, price: 500 },
+  { name: "仙兽", color: "#dcdcaa", mult: 3.5, price: 2000 },
+  { name: "神兽", color: "#ff6b6b", mult: 7.0, price: 8000 },
+];
+
+const PET_TYPES = [
+  { key: "wolf",   name: "灵狼",   attr: "atk",       value: 0.06, icon: "🐺" },
+  { key: "fox",    name: "灵狐",   attr: "crit",      value: 0.03, icon: "🦊" },
+  { key: "tiger",  name: "灵虎",   attr: "hp",        value: 0.10, icon: "🐯" },
+  { key: "dragon", name: "蛟龙",   attr: "lifesteal", value: 0.02, icon: "🐉" },
+  { key: "phoenix",name: "凤凰",   attr: "exp",       value: 0.08, icon: "🦅" },
+  { key: "turtle", name: "玄武",   attr: "gold",      value: 0.10, icon: "🐢" },
+];
+
+// ==================== 转生天赋树 ====================
+const TALENTS = [
+  { branch: "剑道", color: "#ff6b6b", nodes: [
+    { key: "t_jian_1", name: "剑心",    maxLv: 5, effect: { power: 0.08 }, desc: "战力 +8%/级" },
+    { key: "t_jian_2", name: "剑意",    maxLv: 5, effect: { crit: 0.03 },  desc: "暴击 +3%/级" },
+    { key: "t_jian_3", name: "剑魂",    maxLv: 3, effect: { power: 0.20 }, desc: "战力 +20%/级" },
+  ]},
+  { branch: "体道", color: "#6affd8", nodes: [
+    { key: "t_ti_1", name: "铁骨",    maxLv: 5, effect: { hp: 0.15 },     desc: "气血 +15%/级" },
+    { key: "t_ti_2", name: "金身",    maxLv: 5, effect: { hp: 0.20 },     desc: "气血 +20%/级" },
+    { key: "t_ti_3", name: "不灭",    maxLv: 3, effect: { hp: 0.30 },     desc: "气血 +30%/级" },
+  ]},
+  { branch: "魔道", color: "#c586c0", nodes: [
+    { key: "t_mo_1", name: "血煞",    maxLv: 5, effect: { lifesteal: 0.02 }, desc: "吸血 +2%/级" },
+    { key: "t_mo_2", name: "贪狼",    maxLv: 5, effect: { gold: 0.10 },     desc: "灵石 +10%/级" },
+    { key: "t_mo_3", name: "噬魂",    maxLv: 3, effect: { drop: 0.05 },     desc: "掉宝 +5%/级" },
+  ]},
 ];
 
 // ==================== 数据 ====================
@@ -601,29 +440,27 @@ const state = {
   sign: { lastDate: "", streak: 0, days: [] },
   skills: {},
   skillPoints: 0,
-  // 新增
-  sect: null,                  // 当前流派
-  skillCooldown: 0,            // 主动技能冷却（秒）
-  buffAtk: 0,                  // 攻击 buff 持续时间（秒）
-  buffAtkValue: 0,             // 攻击 buff 数值
-  buffDef: 0,                  // 减伤 buff 持续时间
-  stunTimer: 0,                // 怪物眩晕时间
-  knownBooks: {},              // 已学技能书 { key: level }
-  bossKillCount: 0,            // Boss 击杀数（用于技能书掉落统计）
+  sect: null,
+  skillCooldown: 0, buffAtk: 0, buffAtkValue: 0, buffDef: 0, stunTimer: 0,
+  knownBooks: {},
+  pets: [],
+  activePet: null,
+  talentPoints: 0,
+  talents: {},
 };
 
-// ==================== 新境界体系 ====================
+// ==================== 新境界体系（前期需求大幅加大）====================
 const BIG_REALMS = [
-  { name: "炼气期", baseNeed: 50,           basePower: 5 },
-  { name: "筑基期", baseNeed: 3000,         basePower: 300 },
-  { name: "金丹期", baseNeed: 60000,        basePower: 3000 },
-  { name: "元婴期", baseNeed: 800000,       basePower: 25000 },
-  { name: "化神期", baseNeed: 8000000,      basePower: 200000 },
-  { name: "炼虚期", baseNeed: 60000000,     basePower: 1500000 },
-  { name: "合体期", baseNeed: 400000000,    basePower: 10000000 },
-  { name: "大乘期", baseNeed: 2500000000,   basePower: 70000000 },
-  { name: "渡劫期", baseNeed: 15000000000,  basePower: 500000000 },
-  { name: "仙人期", baseNeed: 100000000000, basePower: 4000000000 },
+  { name: "炼气期", baseNeed: 200,           basePower: 5 },
+  { name: "筑基期", baseNeed: 8000,          basePower: 300 },
+  { name: "金丹期", baseNeed: 150000,        basePower: 3000 },
+  { name: "元婴期", baseNeed: 2000000,       basePower: 25000 },
+  { name: "化神期", baseNeed: 20000000,      basePower: 200000 },
+  { name: "炼虚期", baseNeed: 150000000,     basePower: 1500000 },
+  { name: "合体期", baseNeed: 1000000000,    basePower: 10000000 },
+  { name: "大乘期", baseNeed: 6000000000,    basePower: 70000000 },
+  { name: "渡劫期", baseNeed: 40000000000,   basePower: 500000000 },
+  { name: "仙人期", baseNeed: 250000000000,  basePower: 4000000000 },
 ];
 const REALMS = [];
 BIG_REALMS.forEach((big, bigIdx) => {
@@ -650,42 +487,43 @@ const ZONES = [
   { name: "鸿蒙本源", tier: 7, unlock: 63, desc: "鸿蒙道祖出没" },
 ];
 
+// 装备掉率：低等级高，高等级低
 const MONSTERS = {
   0: [
-    { name: "野兔",   hp: 30,   atk: 4,   exp: 1,   gold: 1,   stone: 0, dropRate: 0.20 },
-    { name: "山猪",   hp: 70,   atk: 10,  exp: 2,   gold: 2,   stone: 0, dropRate: 0.25 },
-    { name: "灵狐",   hp: 50,   atk: 8,   exp: 2,   gold: 3,   stone: 1, dropRate: 0.30 },
+    { name: "野兔",   hp: 30,   atk: 4,   exp: 1,   gold: 1,   stone: 0, dropRate: 0.030 },
+    { name: "山猪",   hp: 70,   atk: 10,  exp: 2,   gold: 2,   stone: 0, dropRate: 0.032 },
+    { name: "灵狐",   hp: 50,   atk: 8,   exp: 2,   gold: 3,   stone: 1, dropRate: 0.035 },
   ],
   1: [
-    { name: "妖狼",   hp: 300,  atk: 30,  exp: 15,  gold: 5,   stone: 1, dropRate: 0.35 },
-    { name: "黑熊精", hp: 800,  atk: 70,  exp: 35,  gold: 12,  stone: 2, dropRate: 0.40 },
-    { name: "树妖",   hp: 600,  atk: 55,  exp: 28,  gold: 10,  stone: 2, dropRate: 0.40 },
+    { name: "妖狼",   hp: 300,  atk: 30,  exp: 15,  gold: 5,   stone: 1, dropRate: 0.025 },
+    { name: "黑熊精", hp: 800,  atk: 70,  exp: 35,  gold: 12,  stone: 2, dropRate: 0.026 },
+    { name: "树妖",   hp: 600,  atk: 55,  exp: 28,  gold: 10,  stone: 2, dropRate: 0.026 },
   ],
   2: [
-    { name: "邪修",   hp: 5000,  atk: 400,  exp: 200,  gold: 30,  stone: 3, dropRate: 0.45 },
-    { name: "魔将",   hp: 12000, atk: 900,  exp: 500,  gold: 80,  stone: 5, dropRate: 0.50 },
-    { name: "血魔",   hp: 9000,  atk: 700,  exp: 380,  gold: 60,  stone: 4, dropRate: 0.50 },
+    { name: "邪修",   hp: 5000,  atk: 400,  exp: 200,  gold: 30,  stone: 3, dropRate: 0.020 },
+    { name: "魔将",   hp: 12000, atk: 900,  exp: 500,  gold: 80,  stone: 5, dropRate: 0.021 },
+    { name: "血魔",   hp: 9000,  atk: 700,  exp: 380,  gold: 60,  stone: 4, dropRate: 0.021 },
   ],
   3: [
-    { name: "妖王",   hp: 60000,  atk: 3500,  exp: 3000,  gold: 200, stone: 10, dropRate: 0.55 },
-    { name: "魔尊",   hp: 100000, atk: 5500,  exp: 5000,  gold: 350, stone: 15, dropRate: 0.60 },
-    { name: "古兽",   hp: 80000,  atk: 4500,  exp: 4000,  gold: 280, stone: 12, dropRate: 0.60 },
+    { name: "妖王",   hp: 60000,  atk: 3500,  exp: 3000,  gold: 200, stone: 10, dropRate: 0.015 },
+    { name: "魔尊",   hp: 100000, atk: 5500,  exp: 5000,  gold: 350, stone: 15, dropRate: 0.016 },
+    { name: "古兽",   hp: 80000,  atk: 4500,  exp: 4000,  gold: 280, stone: 12, dropRate: 0.016 },
   ],
   4: [
-    { name: "冥将",   hp: 600000,  atk: 30000,  exp: 30000,  gold: 600,  stone: 25, dropRate: 0.65 },
-    { name: "鬼帝",   hp: 1000000, atk: 50000,  exp: 50000,  gold: 1000, stone: 40, dropRate: 0.70 },
+    { name: "冥将",   hp: 600000,  atk: 30000,  exp: 30000,  gold: 600,  stone: 25, dropRate: 0.012 },
+    { name: "鬼帝",   hp: 1000000, atk: 50000,  exp: 50000,  gold: 1000, stone: 40, dropRate: 0.013 },
   ],
   5: [
-    { name: "仙人残魂", hp: 6000000,  atk: 300000,  exp: 300000,  gold: 3000,  stone: 80,  dropRate: 0.75 },
-    { name: "古神卫",   hp: 10000000, atk: 500000,  exp: 500000,  gold: 5000,  stone: 120, dropRate: 0.80 },
+    { name: "仙人残魂", hp: 6000000,  atk: 300000,  exp: 300000,  gold: 3000,  stone: 80,  dropRate: 0.010 },
+    { name: "古神卫",   hp: 10000000, atk: 500000,  exp: 500000,  gold: 5000,  stone: 120, dropRate: 0.011 },
   ],
   6: [
-    { name: "混沌兽",   hp: 80000000,  atk: 3000000,  exp: 3000000,  gold: 20000,  stone: 300,  dropRate: 0.85 },
-    { name: "虚空魔",   hp: 130000000, atk: 5000000,  exp: 5000000,  gold: 35000,  stone: 450,  dropRate: 0.88 },
+    { name: "混沌兽",   hp: 80000000,  atk: 3000000,  exp: 3000000,  gold: 20000,  stone: 300,  dropRate: 0.008 },
+    { name: "虚空魔",   hp: 130000000, atk: 5000000,  exp: 5000000,  gold: 35000,  stone: 450,  dropRate: 0.009 },
   ],
   7: [
-    { name: "鸿蒙道兵", hp: 600000000,  atk: 25000000,  exp: 25000000,  gold: 120000,  stone: 1000, dropRate: 0.90 },
-    { name: "道祖残念", hp: 1000000000, atk: 40000000,  exp: 40000000,  gold: 250000,  stone: 1800, dropRate: 0.95 },
+    { name: "鸿蒙道兵", hp: 600000000,  atk: 25000000,  exp: 25000000,  gold: 120000,  stone: 1000, dropRate: 0.006 },
+    { name: "道祖残念", hp: 1000000000, atk: 40000000,  exp: 40000000,  gold: 250000,  stone: 1800, dropRate: 0.007 },
   ],
 };
 
@@ -803,10 +641,8 @@ async function cloudLoad() {
       if (data && data.state) {
         Object.assign(state, data.state);
         state.currentMonster = null;
-        state.monsterHp = 0;
-        state.monsterMaxHp = 0;
-        state.isBoss = false;
-        state.bossType = null;
+        state.monsterHp = 0; state.monsterMaxHp = 0;
+        state.isBoss = false; state.bossType = null;
         recalcPower();
         updateSyncStatus("云端存档：已载入", "ok");
         return true;
@@ -869,15 +705,6 @@ function dropGem() {
 // ==================== 技能书 ====================
 function getAvailableBooks() {
   return SKILL_BOOKS.filter(b => state.realmIndex >= b.realm);
-}
-function learnBook(bookKey) {
-  const book = SKILL_BOOKS.find(b => b.key === bookKey);
-  if (!book) return;
-  if (!state.knownBooks[bookKey]) state.knownBooks[bookKey] = 0;
-  if (state.knownBooks[bookKey] >= 5) { log("该技能书已达最高等级", "danger"); return; }
-  state.knownBooks[bookKey]++;
-  log(`学习【${book.name}】成功，等级 ${state.knownBooks[bookKey]}`, "book");
-  recalcPower();
 }
 function getBookBonus() {
   let bonus = { power: 0, hp: 0, lifesteal: 0, crit: 0, exp: 0, gold: 0 };
@@ -952,23 +779,23 @@ function renderSign() {
 function learnSkill(key) {
   const skill = SKILLS.find(s => s.key === key);
   if (!skill) return;
-  if (state.skillPoints < skill.cost) { log("功法点数不足", "danger"); return; }
-  state.skillPoints -= skill.cost;
+  const cost = skill.cost * 5;
+  if (state.skillPoints < cost) { log(`功法点不足（需要 ${cost} 点）`, "danger"); return; }
+  state.skillPoints -= cost;
   state.skills[key] = { level: 1 };
   log(`学会功法【${skill.name}】`, "epic");
-  renderSkills();
-  recalcPower();
+  renderSkills(); recalcPower(); updateUI();
 }
 function levelUpSkill(key) {
   const skill = SKILLS.find(s => s.key === key);
   const owned = state.skills[key];
   if (!owned || owned.level >= skill.maxLv) return;
-  if (state.skillPoints < skill.cost) { log("功法点数不足", "danger"); return; }
-  state.skillPoints -= skill.cost;
+  const cost = skill.cost * (owned.level + 1);
+  if (state.skillPoints < cost) { log(`功法点不足（需要 ${cost} 点）`, "danger"); return; }
+  state.skillPoints -= cost;
   owned.level++;
   log(`【${skill.name}】升级到 ${owned.level} 级`, "epic");
-  renderSkills();
-  recalcPower();
+  renderSkills(); recalcPower(); updateUI();
 }
 function getSkillBonus() {
   const bonus = { power: 0, hp: 0, lifesteal: 0, crit: 0, exp: 0, gold: 0 };
@@ -990,19 +817,21 @@ function renderSkills() {
     const div = document.createElement("div");
     div.className = "skill-item";
     if (owned) {
+      const cost = skill.cost * (owned.level + 1);
       div.innerHTML = `
         <div class="name">${skill.name} <span style="color:#ffd700">Lv.${owned.level}</span></div>
         <div class="desc">${skill.desc}</div>
         <div class="lv">当前效果：${Object.entries(skill.effect).map(([k,v]) => `${k} +${(v*owned.level*100).toFixed(0)}%`).join("，")}</div>
         <button data-skill-up="${skill.key}" ${owned.level >= skill.maxLv ? "disabled" : ""}>
-          ${owned.level >= skill.maxLv ? "已满级" : `升级（${skill.cost} 点）`}
+          ${owned.level >= skill.maxLv ? "已满级" : `升级（${cost} 点）`}
         </button>
       `;
     } else {
+      const cost = skill.cost * 5;
       div.innerHTML = `
         <div class="name">${skill.name}</div>
         <div class="desc">${skill.desc}</div>
-        <button data-skill-learn="${skill.key}">学习（${skill.cost} 点）</button>
+        <button data-skill-learn="${skill.key}">学习（${cost} 点）</button>
       `;
     }
     list.appendChild(div);
@@ -1015,96 +844,192 @@ function renderSkills() {
   });
 }
 
-// ==================== 主动技能 ====================
-function useSectSkill() {
-  if (!state.sect) { log("你还没有加入流派，无法使用技能", "danger"); return; }
-  if (state.skillCooldown > 0) { log(`技能冷却中（剩余 ${state.skillCooldown} 秒）`, "danger"); return; }
-  if (!state.currentMonster || state.monsterHp <= 0) { log("没有目标", "danger"); return; }
-  const sect = SECTS.find(s => s.key === state.sect);
-  const reincMult = 1 + safeNum(state.reincarnBonus);
-  let dmg = 0;
-  switch (state.sect) {
-    case "jian":
-      dmg = state.power * 5 * reincMult;
-      state.monsterHp -= dmg;
-      log(`⚔ 释放【万剑归宗】，造成 ${fmt(dmg)} 伤害！`, "legend");
-      break;
-    case "fa":
-      dmg = state.power * 3 * reincMult;
-      state.monsterHp -= dmg;
-      state.stunTimer = 3;
-      log(`⚡ 释放【天雷咒】，造成 ${fmt(dmg)} 伤害，怪物眩晕 3 秒！`, "epic");
-      break;
-    case "ti":
-      state.buffDef = 5;
-      log(`🛡 释放【金刚不坏】，5 秒内受到伤害减半！`, "rare");
-      break;
-    case "mo":
-      state.hp = Math.min(state.maxHp, state.hp + state.maxHp * 0.5);
-      state.buffAtk = 5;
-      state.buffAtkValue = 0.3;
-      log(`🩸 释放【血魔功】，恢复 50% 气血，攻击 +30% 持续 5 秒！`, "myth");
-      break;
+// ==================== 宠物/灵兽 ====================
+function getPetBonus() {
+  let bonus = { power: 0, crit: 0, hp: 0, lifesteal: 0, exp: 0, gold: 0 };
+  if (!state.activePet) return bonus;
+  const pet = state.pets.find(p => p.id === state.activePet);
+  if (!pet) return bonus;
+  const q = PET_QUALITY.find(x => x.name === pet.quality) || PET_QUALITY[0];
+  const t = PET_TYPES.find(x => x.key === pet.typeKey);
+  if (!t) return bonus;
+  const lv = pet.level || 1;
+  const val = t.value * q.mult * (1 + (lv - 1) * 0.15);
+  if (t.attr === "atk") bonus.power += val;
+  else if (t.attr === "crit") bonus.crit += val;
+  else if (t.attr === "hp") bonus.hp += val;
+  else if (t.attr === "lifesteal") bonus.lifesteal += val;
+  else if (t.attr === "exp") bonus.exp += val;
+  else if (t.attr === "gold") bonus.gold += val;
+  return bonus;
+}
+
+function generatePet(forceQuality) {
+  const t = pick(PET_TYPES);
+  const quality = forceQuality
+    ? PET_QUALITY.find(q => q.name === forceQuality)
+    : (() => {
+        const r = Math.random();
+        if (r < 0.55) return PET_QUALITY[0];
+        if (r < 0.85) return PET_QUALITY[1];
+        if (r < 0.97) return PET_QUALITY[2];
+        return PET_QUALITY[3];
+      })();
+  return {
+    id: Date.now() + Math.random(),
+    typeKey: t.key,
+    name: quality.name + "·" + t.name,
+    quality: quality.name,
+    qualityColor: quality.color || (quality.name === "灵兽" ? "rare" : quality.name === "仙兽" ? "legend" : quality.name === "神兽" ? "myth" : ""),
+    level: 1,
+    attr: t.attr,
+    value: t.value,
+    icon: t.icon,
+  };
+}
+
+function addPet(pet) {
+  state.pets.push(pet);
+  log(`✦ 获得灵兽【${pet.name}】`, "pet");
+}
+
+function dropPet() {
+  const pet = generatePet();
+  addPet(pet);
+}
+
+function setActivePet(id) {
+  state.activePet = id;
+  recalcPower();
+  renderPets();
+  updateUI();
+  log("已切换出战灵兽", "pet");
+}
+
+function releasePet(id) {
+  const pet = state.pets.find(p => p.id === id);
+  if (!pet) return;
+  if (state.activePet === id) state.activePet = null;
+  state.pets = state.pets.filter(p => p.id !== id);
+  recalcPower();
+  renderPets();
+  updateUI();
+  log(`放生灵兽【${pet.name}】`, "pet");
+}
+
+function upgradePet(id) {
+  const pet = state.pets.find(p => p.id === id);
+  if (!pet) return;
+  const cost = 50 * pet.level * pet.level;
+  if (state.gold < cost) { log(`灵石不足（需要 ${cost}）`, "danger"); return; }
+  state.gold -= cost;
+  pet.level++;
+  recalcPower();
+  renderPets();
+  updateUI();
+  log(`【${pet.name}】升级到 Lv.${pet.level}`, "pet");
+}
+
+function renderPets() {
+  const list = document.getElementById("petList");
+  list.innerHTML = "";
+  document.getElementById("petCount").textContent = state.pets.length;
+  const active = state.pets.find(p => p.id === state.activePet);
+  document.getElementById("petActiveName").textContent = active ? active.name : "无";
+  document.getElementById("petActiveName").style.color = active ? (PET_QUALITY.find(q => q.name === active.quality)?.color || "#a0ffaa") : "#888";
+
+  if (state.pets.length === 0) {
+    list.innerHTML = '<div class="empty">还没有灵兽，击杀怪物或去灵兽商店获取</div>';
+    return;
   }
-  state.skillCooldown = sect.cd;
-  renderSkillBar();
+  state.pets.forEach(pet => {
+    const q = PET_QUALITY.find(x => x.name === pet.quality) || PET_QUALITY[0];
+    const t = PET_TYPES.find(x => x.key === pet.typeKey);
+    const div = document.createElement("div");
+    div.className = "item pet";
+    const attrName = { atk: "战力", crit: "暴击", hp: "气血", lifesteal: "吸血", exp: "修为", gold: "灵石" }[t.attr] || t.attr;
+    const val = (t.value * q.mult * (1 + (pet.level - 1) * 0.15) * 100).toFixed(1);
+    const cost = 50 * pet.level * pet.level;
+    div.innerHTML = `
+      <div style="flex:1;min-width:0;">
+        <div class="name" style="color:${q.color};">${pet.icon} ${pet.name} Lv.${pet.level}</div>
+        <div class="pet-line">${attrName} +${val}%</div>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
+        ${state.activePet === pet.id ? '<button disabled>出战中</button>' : `<button class="pet" data-setactive="${pet.id}">出战</button>`}
+        <button class="enhance" data-upgrade="${pet.id}">升级(${cost})</button>
+        <button class="sell" data-release="${pet.id}">放生</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+  list.querySelectorAll("[data-setactive]").forEach(btn => {
+    btn.addEventListener("click", () => setActivePet(parseFloat(btn.dataset.setactive)));
+  });
+  list.querySelectorAll("[data-upgrade]").forEach(btn => {
+    btn.addEventListener("click", () => upgradePet(parseFloat(btn.dataset.upgrade)));
+  });
+  list.querySelectorAll("[data-release]").forEach(btn => {
+    btn.addEventListener("click", () => releasePet(parseFloat(btn.dataset.release)));
+  });
+}
+
+// ==================== 转生天赋树 ====================
+function getTalentBonus() {
+  let bonus = { power: 0, hp: 0, lifesteal: 0, crit: 0, gold: 0, drop: 0 };
+  Object.entries(state.talents || {}).forEach(([key, lv]) => {
+    let found = null;
+    for (const branch of TALENTS) {
+      const node = branch.nodes.find(n => n.key === key);
+      if (node) { found = node; break; }
+    }
+    if (!found) return;
+    Object.entries(found.effect).forEach(([k, v]) => {
+      bonus[k] = (bonus[k] || 0) + v * lv;
+    });
+  });
+  return bonus;
+}
+
+function learnTalent(key) {
+  let node = null;
+  for (const branch of TALENTS) {
+    const n = branch.nodes.find(x => x.key === key);
+    if (n) { node = n; break; }
+  }
+  if (!node) return;
+  const cur = state.talents[key] || 0;
+  if (cur >= node.maxLv) { log("该天赋已满级", "danger"); return; }
+  if (state.talentPoints < 1) { log("天赋点不足", "danger"); return; }
+  state.talentPoints--;
+  state.talents[key] = cur + 1;
+  log(`学习天赋【${node.name}】 Lv.${state.talents[key]}`, "talent");
+  recalcPower();
+  renderTalents();
   updateUI();
 }
 
-function renderSkillBar() {
-  const bar = document.getElementById("skillBar");
-  bar.innerHTML = "";
-  if (!state.sect) {
+function renderTalents() {
+  const tree = document.getElementById("talentTree");
+  if (!tree) return;
+  tree.innerHTML = "";
+  TALENTS.forEach(branch => {
     const div = document.createElement("div");
-    div.style.cssText = "color:#666;font-size:11px;text-align:center;padding:8px;";
-    div.textContent = "加入流派后可释放技能";
-    bar.appendChild(div);
-    return;
-  }
-  const sect = SECTS.find(s => s.key === state.sect);
-  const btn = document.createElement("button");
-  btn.className = "skill-btn";
-  if (state.skillCooldown > 0) {
-    btn.disabled = true;
-    btn.textContent = `${sect.skill} (${state.skillCooldown}s)`;
-  } else {
-    btn.textContent = `释放【${sect.skill}】`;
-    btn.addEventListener("click", useSectSkill);
-  }
-  bar.appendChild(btn);
-}
-
-// ==================== 流派选择 ====================
-function renderSectSelect() {
-  const box = document.getElementById("sectSelect");
-  box.innerHTML = "";
-  SECTS.forEach(sect => {
-    const card = document.createElement("div");
-    card.className = "sect-card";
-    if (state.sect === sect.key) card.classList.add("selected");
-    card.innerHTML = `
-      <h4>${sect.name}</h4>
-      <p>${sect.desc}</p>
-      <button data-sect="${sect.key}" ${state.sect === sect.key ? "disabled" : ""}>
-        ${state.sect === sect.key ? "当前流派" : "选择"}
-      </button>
-    `;
-    box.appendChild(card);
-  });
-  box.querySelectorAll("[data-sect]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const key = btn.dataset.sect;
-      if (state.sect === key) return;
-      if (state.sect && !confirm("转修流派会重置已学功法，确定吗？")) return;
-      state.sect = key;
-      state.skills = {};
-      const sect = SECTS.find(s => s.key === key);
-      log(`★ 加入【${sect.name}】，学会主动技能【${sect.skill}】`, "legend");
-      renderSectSelect();
-      renderSkillBar();
-      renderSkills();
-      recalcPower();
+    div.className = "talent-branch";
+    div.innerHTML = `<h4 style="color:${branch.color};">${branch.branch}</h4>`;
+    branch.nodes.forEach(node => {
+      const lv = state.talents[node.key] || 0;
+      const nodeDiv = document.createElement("div");
+      nodeDiv.className = "node";
+      if (lv >= node.maxLv) nodeDiv.classList.add("maxed");
+      else if (state.talentPoints < 1) nodeDiv.classList.add("locked");
+      nodeDiv.innerHTML = `<div>${node.name} ${lv}/${node.maxLv}</div><div style="color:#666;margin-top:2px;">${node.desc}</div>`;
+      if (lv < node.maxLv && state.talentPoints >= 1) {
+        nodeDiv.addEventListener("click", () => learnTalent(node.key));
+      }
+      div.appendChild(nodeDiv);
     });
+    tree.appendChild(div);
   });
 }
 
@@ -1141,12 +1066,8 @@ function generateEquip(forceQuality, boost) {
     quality: quality.name,
     qualityColor: quality.color,
     power, basePower: power,
-    level: 0,
-    maxLevel: quality.maxLv,
-    enhanceCost: quality.enhanceCost,
-    affixes,
-    gems: [],
-    gemSlots: quality.gemSlots,
+    level: 0, maxLevel: quality.maxLv, enhanceCost: quality.enhanceCost,
+    affixes, gems: [], gemSlots: quality.gemSlots,
   };
 }
 function rerollRandomAffix() {
@@ -1157,11 +1078,9 @@ function rerollRandomAffix() {
   const affix = pick(item.affixes);
   const affixDef = AFFIXES.find(a => a.key === affix.key);
   const newVal = randFloat(affixDef.min, affixDef.max);
-  affix.value = newVal;
-  affix.name = affixDef.name;
+  affix.value = newVal; affix.name = affixDef.name;
   log(`洗练【${item.quality}·${item.name}】，${affix.name} 变为 ${(newVal*100).toFixed(1)}%`, "epic");
-  updateUI();
-  renderInventory();
+  updateUI(); renderInventory();
 }
 
 // ==================== 属性计算 ====================
@@ -1192,6 +1111,14 @@ function calcEquipStats() {
   power *= (1 + bookBonus.power);
   hpBonus += bookBonus.hp; crit += bookBonus.crit;
   lifesteal += bookBonus.lifesteal; expBonus += bookBonus.exp; goldBonus += bookBonus.gold;
+  const petBonus = getPetBonus();
+  power *= (1 + petBonus.power); crit += petBonus.crit;
+  hpBonus += petBonus.hp; lifesteal += petBonus.lifesteal;
+  expBonus += petBonus.exp; goldBonus += petBonus.gold;
+  const talentBonus = getTalentBonus();
+  power *= (1 + talentBonus.power); hpBonus += talentBonus.hp;
+  lifesteal += talentBonus.lifesteal; crit += talentBonus.crit;
+  goldBonus += talentBonus.gold; dropBonus += talentBonus.drop;
   const names = equipped.map(i => i.name);
   let setBonus = { active: false, count: 0, name: "" };
   for (const set of SETS) {
@@ -1232,6 +1159,7 @@ function recalcPower() {
   state.kills = Math.max(0, safeNum(state.kills));
   state.sectPoint = Math.max(0, safeNum(state.sectPoint));
   state.skillPoints = Math.max(0, safeNum(state.skillPoints));
+  state.talentPoints = Math.max(0, safeNum(state.talentPoints));
 }
 
 // ==================== 装备操作 ====================
@@ -1254,8 +1182,7 @@ function equipItem(item) {
   state.inventory = state.inventory.filter(i => i.id !== item.id);
   recalcPower();
   log(`装备【${item.quality}·${item.name} +${item.level}】`, item.qualityColor);
-  updateUI();
-  renderInventory();
+  updateUI(); renderInventory();
 }
 function unequipItem(slot) {
   const item = state.equipment[slot];
@@ -1264,8 +1191,7 @@ function unequipItem(slot) {
   state.equipment[slot] = null;
   recalcPower();
   log(`卸下【${item.quality}·${item.name}】`);
-  updateUI();
-  renderInventory();
+  updateUI(); renderInventory();
 }
 function sellItem(item) {
   const quality = QUALITY.find(q => q.name === item.quality);
@@ -1275,8 +1201,7 @@ function sellItem(item) {
   state.gold += price;
   state.inventory = state.inventory.filter(i => i.id !== item.id);
   log(`出售【${item.quality}·${item.name}】，获得 ${price} 灵石`, "gold");
-  updateUI();
-  renderInventory();
+  updateUI(); renderInventory();
 }
 function sellByQuality(quality) {
   const items = state.inventory.filter(i => i.quality === quality);
@@ -1292,8 +1217,7 @@ function sellByQuality(quality) {
   state.inventory = state.inventory.filter(i => i.quality !== quality);
   state.gold += totalGold;
   log(`批量出售 ${items.length} 件【${quality}】装备，获得 ${totalGold} 灵石`, "gold");
-  updateUI();
-  renderInventory();
+  updateUI(); renderInventory();
 }
 
 // ==================== UI ====================
@@ -1313,9 +1237,15 @@ function updateUI() {
   document.getElementById("kills").textContent = fmt(state.kills);
   document.getElementById("sectPoint").textContent = fmt(state.sectPoint);
   document.getElementById("sectQuest").textContent = `讨伐 ${state.sectQuestProgress}/${state.sectQuestTarget}`;
+  document.getElementById("skillPoints").textContent = fmt(state.skillPoints);
+  document.getElementById("talentPoints").textContent = fmt(state.talentPoints);
+  document.getElementById("talentPoints2").textContent = fmt(state.talentPoints);
+  document.getElementById("miniTalent").textContent = fmt(state.talentPoints);
   document.getElementById("breakBtn").disabled = state.exp < realm.need;
   document.getElementById("breakBtn").textContent = state.autoBreak ? "突破境界（自动）" : "突破境界（手动）";
   document.getElementById("currentSect").textContent = state.sect ? SECTS.find(s => s.key === state.sect).name : "未入门";
+  const active = state.pets.find(p => p.id === state.activePet);
+  document.getElementById("activePetName").textContent = active ? active.name : "无";
 
   if (state.currentMonster && isFinite(state.monsterHp) && isFinite(state.monsterMaxHp)) {
     const bossTag = state.isBoss ? ` <span class="boss-tag">[${state.bossType}]</span>` : "";
@@ -1369,7 +1299,6 @@ function renderInventory() {
     list.appendChild(div);
   }
 
-  // 技能书
   const knownBooksList = Object.keys(state.knownBooks || {}).filter(k => state.knownBooks[k] > 0);
   if (knownBooksList.length > 0) {
     const title = document.createElement("div");
@@ -1391,7 +1320,6 @@ function renderInventory() {
     });
   }
 
-  // 宝石背包
   const gemKeys = Object.keys(state.gems).filter(k => state.gems[k] > 0);
   if (gemKeys.length > 0) {
     const title = document.createElement("div");
@@ -1521,8 +1449,7 @@ function bindInventoryEvents() {
       const item = [...state.inventory, ...Object.values(state.equipment)].find(i => i && i.id === id);
       if (item) {
         unsocketGem(item, idx);
-        renderInventory();
-        updateUI();
+        renderInventory(); updateUI();
       }
     }
   });
@@ -1539,10 +1466,7 @@ function openSocketPanel(item) {
   if (!chosen) return;
   const gem = GEMS.find(g => g.name === chosen.trim());
   if (!gem) { log("宝石名称不正确", "danger"); return; }
-  if (socketGem(item, gem.key)) {
-    renderInventory();
-    updateUI();
-  }
+  if (socketGem(item, gem.key)) { renderInventory(); updateUI(); }
 }
 
 function renderShop(sub = "normal") {
@@ -1572,7 +1496,7 @@ function renderShop(sub = "normal") {
         } else log("灵石不足！", "danger");
       });
     });
-  } else {
+  } else if (sub === "gem") {
     GEM_SHOP.forEach((item, index) => {
       const g = item.random ? null : GEMS.find(x => x.key === item.key);
       const div = document.createElement("div");
@@ -1601,8 +1525,32 @@ function renderShop(sub = "normal") {
             const g = GEMS.find(x => x.key === item.key);
             log(`购买【${g.name}】×${item.count}`, "gem");
           }
-          updateUI();
-          renderInventory();
+          updateUI(); renderInventory();
+        } else log("灵石不足！", "danger");
+      });
+    });
+  } else if (sub === "pet") {
+    PET_QUALITY.forEach((q, index) => {
+      const div = document.createElement("div");
+      div.className = "shop-item";
+      div.innerHTML = `
+        <div>
+          <div class="name" style="color:${q.color || "#ccc"};font-size:12px;">${q.name}蛋</div>
+          <div class="attr" style="color:#888;font-size:10px;">随机一只${q.name}灵兽</div>
+        </div>
+        <button data-buy-pet="${index}">${q.price} 灵石</button>
+      `;
+      list.appendChild(div);
+    });
+    list.querySelectorAll("[data-buy-pet]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.buyPet);
+        const q = PET_QUALITY[index];
+        if (state.gold >= q.price) {
+          state.gold -= q.price;
+          const pet = generatePet(q.name);
+          addPet(pet);
+          updateUI(); renderPets();
         } else log("灵石不足！", "danger");
       });
     });
@@ -1626,8 +1574,7 @@ function renderZones() {
         state.currentMonster = null;
         state.isBoss = false;
         log(`前往【${zone.name}】`, "rare");
-        renderZones();
-        spawnMonster();
+        renderZones(); spawnMonster();
       });
     }
     zoneSelect.appendChild(div);
@@ -1683,7 +1630,6 @@ function fightTick() {
   if (state.stamina < 5) { state.stamina = Math.min(state.maxStamina, state.stamina + 2); return; }
   state.stamina -= 5;
 
-  // 冷却
   if (state.skillCooldown > 0) state.skillCooldown--;
   if (state.buffAtk > 0) state.buffAtk--;
   if (state.buffDef > 0) state.buffDef--;
@@ -1713,10 +1659,18 @@ function fightTick() {
     state.stone += m.stone;
     state.kills++;
     state.sectQuestProgress++;
-    state.skillPoints = (state.skillPoints || 0) + (state.isBoss ? 3 : 1);
+
+    let pointGain = 0;
+    if (state.isBoss) {
+      if (Math.random() < 0.10) pointGain = 3;
+    } else {
+      if (Math.random() < 0.01) pointGain = 1;
+    }
+    if (pointGain > 0) state.skillPoints = (state.skillPoints || 0) + pointGain;
 
     const critText = isCrit ? " [暴击]" : "";
-    log(`击败【${m.name}】${critText}，修为 +${fmt(expGain)}，灵石 +${fmt(goldGain)}，强化石 +${m.stone}，功法点 +${state.isBoss ? 3 : 1}`, isCrit ? "legend" : "");
+    const pointText = pointGain > 0 ? `，功法点 +${pointGain}` : "";
+    log(`击败【${m.name}】${critText}，修为 +${fmt(expGain)}，灵石 +${fmt(goldGain)}，强化石 +${m.stone}${pointText}`, isCrit ? "legend" : "");
 
     const dropRate = Math.min(0.95, m.dropRate + state.dropBonus);
     if (Math.random() < dropRate) {
@@ -1725,8 +1679,8 @@ function fightTick() {
       log(`✦ 掉落【${eq.quality}·${eq.name}】，战力 +${eq.power}`, eq.qualityColor);
     }
     if (Math.random() < 0.10) dropGem();
+    if (Math.random() < 0.005) dropPet();
 
-    // Boss 掉落技能书
     if (state.isBoss && m.bookDropRate) {
       if (Math.random() < m.bookDropRate) {
         const availableBooks = getAvailableBooks();
@@ -1761,7 +1715,6 @@ function fightTick() {
     }
     spawnMonster();
   } else {
-    // 怪物攻击（眩晕时不攻击）
     if (state.stunTimer <= 0) {
       let monsterDamage = Math.floor(state.currentMonster.atk * (0.7 + Math.random() * 0.6));
       if (state.buffDef > 0) monsterDamage = Math.floor(monsterDamage * 0.5);
@@ -1773,7 +1726,6 @@ function fightTick() {
       }
     }
   }
-
   updateUI();
 }
 
@@ -1791,8 +1743,7 @@ function doBreak() {
   state.basePower = next.power;
   recalcPower();
   log(`★ 突破成功！当前境界：${next.name}`, "legend");
-  renderZones();
-  updateUI();
+  renderZones(); updateUI();
 }
 
 // ==================== 宗门技能阁 ====================
@@ -1809,14 +1760,13 @@ function renderSkillShop() {
     const owned = state.knownBooks[book.key] || 0;
     const div = document.createElement("div");
     div.className = "shop-item";
-    const price = book.price;
     div.innerHTML = `
       <div>
         <div class="name" style="color:#ffaa00;font-size:12px;">${book.name} ${owned > 0 ? `(已学 Lv.${owned})` : ""}</div>
         <div class="attr" style="color:#888;font-size:10px;">${book.desc}</div>
       </div>
-      <button data-buy-book="${book.key}" ${state.sectPoint < price || owned >= 5 ? "disabled" : ""}>
-        ${owned >= 5 ? "已满级" : `${price} 贡献`}
+      <button data-buy-book="${book.key}" ${state.sectPoint < book.price || owned >= 5 ? "disabled" : ""}>
+        ${owned >= 5 ? "已满级" : `${book.price} 贡献`}
       </button>
     `;
     box.appendChild(div);
@@ -1832,9 +1782,98 @@ function renderSkillShop() {
       state.sectPoint -= book.price;
       state.knownBooks[book.key] = owned + 1;
       log(`兑换技能书【${book.name}】成功，Lv.${state.knownBooks[book.key]}`, "book");
-      recalcPower();
-      updateUI();
-      renderSkillShop();
+      recalcPower(); updateUI(); renderSkillShop();
+    });
+  });
+}
+
+// ==================== 主动技能 ====================
+function useSectSkill() {
+  if (!state.sect) { log("你还没有加入流派，无法使用技能", "danger"); return; }
+  if (state.skillCooldown > 0) { log(`技能冷却中（剩余 ${state.skillCooldown} 秒）`, "danger"); return; }
+  if (!state.currentMonster || state.monsterHp <= 0) { log("没有目标", "danger"); return; }
+  const sect = SECTS.find(s => s.key === state.sect);
+  const reincMult = 1 + safeNum(state.reincarnBonus);
+  switch (state.sect) {
+    case "jian": {
+      const dmg = state.power * 5 * reincMult;
+      state.monsterHp -= dmg;
+      log(`⚔ 释放【万剑归宗】，造成 ${fmt(dmg)} 伤害！`, "legend");
+      break;
+    }
+    case "fa": {
+      const dmg = state.power * 3 * reincMult;
+      state.monsterHp -= dmg;
+      state.stunTimer = 3;
+      log(`⚡ 释放【天雷咒】，造成 ${fmt(dmg)} 伤害，怪物眩晕 3 秒！`, "epic");
+      break;
+    }
+    case "ti": {
+      state.buffDef = 5;
+      log(`🛡 释放【金刚不坏】，5 秒内受到伤害减半！`, "rare");
+      break;
+    }
+    case "mo": {
+      state.hp = Math.min(state.maxHp, state.hp + state.maxHp * 0.5);
+      state.buffAtk = 5;
+      state.buffAtkValue = 0.3;
+      log(`🩸 释放【血魔功】，恢复 50% 气血，攻击 +30% 持续 5 秒！`, "myth");
+      break;
+    }
+  }
+  state.skillCooldown = sect.cd;
+  renderSkillBar(); updateUI();
+}
+function renderSkillBar() {
+  const bar = document.getElementById("skillBar");
+  bar.innerHTML = "";
+  if (!state.sect) {
+    const div = document.createElement("div");
+    div.style.cssText = "color:#666;font-size:11px;text-align:center;padding:8px;";
+    div.textContent = "加入流派后可释放技能";
+    bar.appendChild(div);
+    return;
+  }
+  const sect = SECTS.find(s => s.key === state.sect);
+  const btn = document.createElement("button");
+  btn.className = "skill-btn";
+  if (state.skillCooldown > 0) {
+    btn.disabled = true;
+    btn.textContent = `${sect.skill} (${state.skillCooldown}s)`;
+  } else {
+    btn.textContent = `释放【${sect.skill}】`;
+    btn.addEventListener("click", useSectSkill);
+  }
+  bar.appendChild(btn);
+}
+
+// ==================== 流派选择 ====================
+function renderSectSelect() {
+  const box = document.getElementById("sectSelect");
+  box.innerHTML = "";
+  SECTS.forEach(sect => {
+    const card = document.createElement("div");
+    card.className = "sect-card";
+    if (state.sect === sect.key) card.classList.add("selected");
+    card.innerHTML = `
+      <h4>${sect.name}</h4>
+      <p>${sect.desc}</p>
+      <button data-sect="${sect.key}" ${state.sect === sect.key ? "disabled" : ""}>
+        ${state.sect === sect.key ? "当前流派" : "选择"}
+      </button>
+    `;
+    box.appendChild(card);
+  });
+  box.querySelectorAll("[data-sect]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.sect;
+      if (state.sect === key) return;
+      if (state.sect && !confirm("转修流派会重置已学功法，确定吗？")) return;
+      state.sect = key;
+      state.skills = {};
+      const sect = SECTS.find(s => s.key === key);
+      log(`★ 加入【${sect.name}】，学会主动技能【${sect.skill}】`, "legend");
+      renderSectSelect(); renderSkillBar(); renderSkills(); recalcPower(); updateUI();
     });
   });
 }
@@ -1845,6 +1884,7 @@ function doReincarn() {
   if (state.realmIndex < needRealm) { log("境界不足，无法转生", "danger"); return; }
   state.reincarnCount++;
   state.reincarnBonus = state.reincarnCount * 0.2;
+  state.talentPoints = (state.talentPoints || 0) + 3;
   state.realmIndex = 0; state.exp = 0;
   state.hp = 100; state.maxHp = 100;
   state.stamina = 100; state.maxStamina = 100;
@@ -1858,14 +1898,10 @@ function doReincarn() {
   state.sectQuestProgress = 0; state.sectQuestTarget = 5;
   state.skillCooldown = 0; state.buffAtk = 0; state.buffDef = 0; state.stunTimer = 0;
   recalcPower();
-  spawnMonster();
-  renderZones();
-  renderInventory();
-  renderSkillBar();
-  renderSectSelect();
-  renderSkillShop();
+  spawnMonster(); renderZones(); renderInventory(); renderSkillBar();
+  renderSectSelect(); renderSkillShop(); renderTalents(); renderPets();
   updateUI();
-  log(`★★★ 转生成功！当前转生 ${state.reincarnCount} 次，永久加成 +${(state.reincarnBonus*100).toFixed(0)}%`, "myth");
+  log(`★★★ 转生成功！转生 ${state.reincarnCount} 次，永久加成 +${(state.reincarnBonus*100).toFixed(0)}%，天赋点 +3`, "myth");
 }
 
 // ==================== 恢复 ====================
@@ -1886,6 +1922,7 @@ function saveGame() {
   state.kills = Math.max(0, safeNum(state.kills));
   state.sectPoint = Math.max(0, safeNum(state.sectPoint));
   state.skillPoints = Math.max(0, safeNum(state.skillPoints));
+  state.talentPoints = Math.max(0, safeNum(state.talentPoints));
   state.monsterHp = safeNum(state.monsterHp);
   state.monsterMaxHp = safeNum(state.monsterMaxHp, 1);
   localStorage.setItem("xiuxian_arpg_save", JSON.stringify(extractSaveData()));
@@ -1908,6 +1945,7 @@ function loadGame() {
       state.kills = Math.max(0, safeNum(state.kills));
       state.sectPoint = Math.max(0, safeNum(state.sectPoint));
       state.skillPoints = Math.max(0, safeNum(state.skillPoints));
+      state.talentPoints = Math.max(0, safeNum(state.talentPoints));
       state.reincarnCount = Math.max(0, safeNum(state.reincarnCount));
       state.reincarnBonus = Math.max(0, safeNum(state.reincarnBonus));
       state.realmIndex = Math.max(0, Math.min(REALMS.length - 1, safeNum(state.realmIndex)));
@@ -1923,6 +1961,9 @@ function loadGame() {
       state.buffAtk = safeNum(state.buffAtk);
       state.buffDef = safeNum(state.buffDef);
       state.stunTimer = safeNum(state.stunTimer);
+      state.pets = Array.isArray(state.pets) ? state.pets : [];
+      state.activePet = state.activePet || null;
+      state.talents = state.talents || {};
       recalcPower();
     } catch (e) { console.warn("存档读取失败"); }
   }
@@ -1982,6 +2023,8 @@ document.querySelectorAll(".tab").forEach(tab => {
     if (tab.dataset.tab === "shop") renderShop(currentShopTab);
     if (tab.dataset.tab === "skill") renderSkills();
     if (tab.dataset.tab === "sect") { renderSectSelect(); renderSkillShop(); }
+    if (tab.dataset.tab === "pet") renderPets();
+    if (tab.dataset.tab === "reincarn") renderTalents();
   });
 });
 let currentShopTab = "normal";
@@ -2014,17 +2057,10 @@ async function init() {
   loadGame();
   bindInventoryEvents();
   log("你于洞府中睁开双眼，开始了偷偷摸摸的修仙之路……");
-  log("提示：去【宗门】选流派，去【功法】学技能，Boss 可掉技能书。", "rare");
-  spawnMonster();
-  renderZones();
-  renderInventory();
-  renderShop();
-  renderSkills();
-  renderSign();
-  renderSectSelect();
-  renderSkillShop();
-  renderSkillBar();
-  updateUI();
+  log("提示：去【宗门】选流派、换技能书，去【灵兽】出战宠物。", "rare");
+  spawnMonster(); renderZones(); renderInventory(); renderShop(); renderSkills();
+  renderSign(); renderSectSelect(); renderSkillShop(); renderSkillBar();
+  renderPets(); renderTalents(); updateUI();
 
   updateSyncStatus("云端存档：连接中…", "");
   const hasCloud = await cloudLoad();
@@ -2033,14 +2069,8 @@ async function init() {
     if (!state.currentMonster || !isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) {
       spawnMonster();
     }
-    updateUI();
-    renderInventory();
-    renderZones();
-    renderSkills();
-    renderSign();
-    renderSectSelect();
-    renderSkillShop();
-    renderSkillBar();
+    updateUI(); renderInventory(); renderZones(); renderSkills(); renderSign();
+    renderSectSelect(); renderSkillShop(); renderSkillBar(); renderPets(); renderTalents();
   } else {
     updateSyncStatus("云端存档：首次上传", "");
     await cloudSave();
