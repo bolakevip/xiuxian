@@ -18,7 +18,7 @@
     user-select: none;
   }
   #app {
-    width: 420px;
+    width: 440px;
     background: #14141a;
     border: 1px solid #2a2a35;
     border-radius: 12px;
@@ -38,9 +38,11 @@
     display: flex;
     gap: 3px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
   }
   .tab {
     flex: 1;
+    min-width: 52px;
     text-align: center;
     padding: 6px 0;
     font-size: 11px;
@@ -122,6 +124,7 @@
   .gold   { color: #ffd700; }
   .myth   { color: #ff6b6b; font-weight: bold; text-shadow: 0 0 6px #ff6b6b; }
   .set    { color: #6affd8; font-weight: bold; }
+  .gem    { color: #66d9ff; font-weight: bold; }
 
   .btn {
     width: 100%;
@@ -142,6 +145,8 @@
   .btn.gold:hover:not(:disabled) { background: #b08a0e; }
   .btn.danger { background: #8a2a2a; }
   .btn.danger:hover:not(:disabled) { background: #b03a3a; }
+  .btn.gem { background: #1a6a8a; }
+  .btn.gem:hover:not(:disabled) { background: #2288b0; }
 
   .item {
     display: flex;
@@ -154,6 +159,7 @@
     font-size: 11px;
     border-left: 3px solid #444;
     gap: 8px;
+    flex-wrap: wrap;
   }
   .item.灵品 { border-left-color: #4ec9b0; }
   .item.宝品 { border-left-color: #c586c0; }
@@ -163,6 +169,7 @@
   .item .attr { color: #888; font-size: 10px; margin-top: 2px; }
   .item .lvup { color: #4ec9b0; font-size: 10px; }
   .item .stat-line { color: #6affd8; font-size: 10px; margin-top: 1px; }
+  .item .gem-line { color: #66d9ff; font-size: 10px; margin-top: 1px; }
   .item button {
     background: #0e639c;
     color: #fff;
@@ -178,6 +185,8 @@
   .item button.enhance:hover { background: #9b4dc4; }
   .item button.sell { background: #8a3a3a; }
   .item button.sell:hover { background: #b04a4a; }
+  .item button.gem { background: #1a6a8a; }
+  .item button.gem:hover { background: #2288b0; }
   .empty { color: #555; text-align: center; padding: 20px; font-size: 12px; }
 
   .toggle {
@@ -197,7 +206,8 @@
 
   .mini #log, .mini .bar-bg, .mini .tabs, .mini .panel,
   .mini .btn, .mini #inventoryList, .mini #shopList,
-  .mini .battle-box, .mini #sellBar { display: none; }
+  .mini .battle-box, .mini #sellBar, .mini .gem-bar,
+  .mini .sign-bar { display: none; }
   .mini .mini-info { display: block; }
   .mini { width: 210px; padding: 10px; }
   .mini-info { display: none; }
@@ -282,6 +292,102 @@
   .sync-status { font-size: 11px; text-align: center; margin-top: 4px; color: #888; }
   .sync-status.ok { color: #4ec9b0; }
   .sync-status.err { color: #f14c4c; }
+
+  .sign-bar {
+    background: #1a1a22;
+    border: 1px solid #3a3a48;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  .sign-bar h3 { color: #ffd700; font-size: 12px; margin-bottom: 6px; }
+  .sign-bar p { color: #888; font-size: 11px; margin-bottom: 8px; }
+  .sign-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    margin-bottom: 8px;
+  }
+  .sign-day {
+    background: #0e0e12;
+    border: 1px solid #2a2a35;
+    border-radius: 4px;
+    padding: 5px 2px;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+  }
+  .sign-day.done {
+    background: #1a3a2a;
+    border-color: #2a5a4a;
+    color: #6affd8;
+  }
+  .sign-day.today {
+    background: #3a2a0a;
+    border-color: #6a4a1a;
+    color: #ffd700;
+    font-weight: bold;
+  }
+
+  .gem-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .gem-slot {
+    background: #0e0e12;
+    border: 1px dashed #3a3a48;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 10px;
+    color: #66d9ff;
+    cursor: pointer;
+  }
+  .gem-slot.empty { color: #444; }
+  .gem-slot:hover { border-color: #66d9ff; }
+
+  .skill-item {
+    background: #1a1a22;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    border-left: 3px solid #c586c0;
+  }
+  .skill-item .name { color: #c586c0; font-size: 12px; font-weight: bold; }
+  .skill-item .desc { color: #888; font-size: 10px; margin-top: 2px; }
+  .skill-item .lv { color: #ffd700; font-size: 10px; margin-top: 2px; }
+  .skill-item button {
+    background: #7a3d9c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 9px;
+    font-size: 10px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .skill-item button:hover { background: #9b4dc4; }
+  .skill-item button:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+  .sub-tabs {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 8px;
+  }
+  .sub-tab {
+    flex: 1;
+    text-align: center;
+    padding: 5px 0;
+    font-size: 11px;
+    background: #1f1f28;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #777;
+  }
+  .sub-tab.active { background: #0e639c; color: #fff; }
 </style>
 </head>
 <body>
@@ -302,12 +408,20 @@
   <div class="tabs">
     <div class="tab active" data-tab="cultivate">修炼</div>
     <div class="tab" data-tab="inventory">背包</div>
+    <div class="tab" data-tab="skill">功法</div>
     <div class="tab" data-tab="shop">商店</div>
     <div class="tab" data-tab="sect">宗门</div>
     <div class="tab" data-tab="reincarn">转生</div>
   </div>
 
   <div class="panel active" id="panel-cultivate">
+    <div id="signBar" class="sign-bar">
+      <h3>📅 每日签到</h3>
+      <p id="signDesc">连续签到第 0 天，点击下方按钮领取今日奖励。</p>
+      <div class="sign-grid" id="signGrid"></div>
+      <button class="btn gold" id="signBtn">今日签到</button>
+    </div>
+
     <div class="row"><span>境界</span><span id="realm">炼气一层</span></div>
     <div class="row"><span>修为</span><span id="expText">0 / 10</span></div>
     <div class="bar-bg"><div class="bar-fill" id="expFill"></div></div>
@@ -346,7 +460,16 @@
     <div id="inventoryList"><div class="empty">背包空空如也</div></div>
   </div>
 
+  <div class="panel" id="panel-skill">
+    <div class="row"><span>已学功法</span><span id="skillCount">0</span></div>
+    <div id="skillList"></div>
+  </div>
+
   <div class="panel" id="panel-shop">
+    <div class="sub-tabs">
+      <div class="sub-tab active" data-sub="normal">普通商店</div>
+      <div class="sub-tab" data-sub="gem">宝石商店</div>
+    </div>
     <div id="shopList"></div>
   </div>
 
@@ -411,9 +534,38 @@ const state = {
   reincarnCount: 0,
   reincarnBonus: 0,
   setBonus: { active: false, count: 0, name: "" },
+  // 新增
+  gems: {},           // 宝石背包：{ 类型: 数量 }
+  sign: {             // 签到
+    lastDate: "",
+    streak: 0,
+    days: [],         // 最近7天的签到状态
+  },
+  skills: {},         // 已学功法：{ key: { level: n } }
+  skillPoints: 0,     // 功法点数（击杀怪物获得）
 };
 
-// ==================== 新境界体系（90 个阶段）====================
+// ==================== 宝石定义 ====================
+const GEMS = [
+  { key: "ruby",    name: "红宝石",   color: "#ff6b6b", attr: "atk",       value: 0.05, desc: "战力 +5%/颗" },
+  { key: "sapphire",name: "蓝宝石",   color: "#66d9ff", attr: "crit",      value: 0.02, desc: "暴击 +2%/颗" },
+  { key: "emerald", name: "绿宝石",   color: "#6affd8", attr: "lifesteal", value: 0.01, desc: "吸血 +1%/颗" },
+  { key: "topaz",   name: "黄玉",     color: "#ffd700", attr: "gold",      value: 0.05, desc: "灵石 +5%/颗" },
+  { key: "amethyst",name: "紫晶",     color: "#c586c0", attr: "exp",       value: 0.03, desc: "修为 +3%/颗" },
+  { key: "diamond", name: "钻石",     color: "#ffffff", attr: "drop",      value: 0.02, desc: "掉宝 +2%/颗" },
+];
+
+// ==================== 功法定义 ====================
+const SKILLS = [
+  { key: "yujian",   name: "御剑术",   desc: "战力 +10%/级",     maxLv: 10, cost: 1, effect: { power: 0.10 } },
+  { key: "guixi",    name: "龟息功",   desc: "气血 +15%/级",     maxLv: 10, cost: 1, effect: { hp: 0.15 } },
+  { key: "xixing",   name: "吸星大法", desc: "吸血 +3%/级",      maxLv: 10, cost: 2, effect: { lifesteal: 0.03 } },
+  { key: "poyun",    name: "破云式",   desc: "暴击 +3%/级",      maxLv: 10, cost: 2, effect: { crit: 0.03 } },
+  { key: "juling",   name: "聚灵诀",   desc: "修为 +5%/级",      maxLv: 10, cost: 1, effect: { exp: 0.05 } },
+  { key: "caiyun",   name: "财运诀",   desc: "灵石 +8%/级",      maxLv: 10, cost: 1, effect: { gold: 0.08 } },
+];
+
+// ==================== 新境界体系 ====================
 const BIG_REALMS = [
   { name: "炼气期", baseNeed: 50,           basePower: 5 },
   { name: "筑基期", baseNeed: 3000,         basePower: 300 },
@@ -433,14 +585,7 @@ BIG_REALMS.forEach((big, bigIdx) => {
     const progress = (sub - 1) / 8;
     const need = Math.floor(big.baseNeed * (1 + progress * 2));
     const power = Math.floor(big.basePower * (1 + progress * 2));
-    REALMS.push({
-      name: big.name + sub + "层",
-      big: big.name,
-      sub: sub,
-      need: need,
-      power: power,
-      bigIndex: bigIdx,
-    });
+    REALMS.push({ name: big.name + sub + "层", big: big.name, sub, need, power, bigIndex: bigIdx });
   }
 });
 
@@ -506,11 +651,11 @@ const EQUIP_SLOTS = [
 ];
 
 const QUALITY = [
-  { name: "凡品", color: "",        mult: 1.0, price: 10,  enhanceCost: 5,   maxLv: 5,  statCount: 0 },
-  { name: "灵品", color: "rare",    mult: 1.6, price: 50,  enhanceCost: 15,  maxLv: 8,  statCount: 1 },
-  { name: "宝品", color: "epic",    mult: 2.5, price: 200, enhanceCost: 40,  maxLv: 12, statCount: 2 },
-  { name: "仙品", color: "legend",  mult: 4.0, price: 800, enhanceCost: 100, maxLv: 15, statCount: 3 },
-  { name: "神品", color: "myth",    mult: 7.0, price: 3000,enhanceCost: 250, maxLv: 20, statCount: 4 },
+  { name: "凡品", color: "",        mult: 1.0, price: 10,  enhanceCost: 5,   maxLv: 5,  statCount: 0, gemSlots: 0 },
+  { name: "灵品", color: "rare",    mult: 1.6, price: 50,  enhanceCost: 15,  maxLv: 8,  statCount: 1, gemSlots: 1 },
+  { name: "宝品", color: "epic",    mult: 2.5, price: 200, enhanceCost: 40,  maxLv: 12, statCount: 2, gemSlots: 2 },
+  { name: "仙品", color: "legend",  mult: 4.0, price: 800, enhanceCost: 100, maxLv: 15, statCount: 3, gemSlots: 3 },
+  { name: "神品", color: "myth",    mult: 7.0, price: 3000,enhanceCost: 250, maxLv: 20, statCount: 4, gemSlots: 4 },
 ];
 
 const AFFIXES = [
@@ -543,10 +688,21 @@ const SHOP_ITEMS = [
   { name: "仙品装备箱", price: 3000,desc: "随机仙品装备",          action: () => { const eq = generateEquip("仙品"); state.inventory.push(eq); log(`获得【仙品·${eq.name}】`, "legend"); } },
 ];
 
+const GEM_SHOP = [
+  { key: "ruby",    price: 300,  count: 1 },
+  { key: "sapphire",price: 500,  count: 1 },
+  { key: "emerald", price: 800,  count: 1 },
+  { key: "topaz",   price: 400,  count: 1 },
+  { key: "amethyst",price: 600,  count: 1 },
+  { key: "diamond", price: 1200, count: 1 },
+  { key: "random",  price: 200,  count: 1, random: true },
+];
+
 // ==================== 工具 ====================
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function randFloat(min, max) { return Math.random() * (max - min) + min; }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function today() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
 
 function fmt(n) {
   const num = Number(n);
@@ -593,14 +749,9 @@ async function cloudSave() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data: extractSaveData() }),
     });
-    if (res.ok) {
-      updateSyncStatus("云端存档：已同步", "ok");
-    } else {
-      updateSyncStatus("云端存档：同步失败", "err");
-    }
-  } catch (e) {
-    updateSyncStatus("云端存档：离线", "err");
-  }
+    if (res.ok) updateSyncStatus("云端存档：已同步", "ok");
+    else updateSyncStatus("云端存档：同步失败", "err");
+  } catch (e) { updateSyncStatus("云端存档：离线", "err"); }
 }
 
 async function cloudLoad() {
@@ -610,7 +761,6 @@ async function cloudLoad() {
       const data = await res.json();
       if (data && data.state) {
         Object.assign(state, data.state);
-        // 强制清除旧存档里的怪物状态，避免卡死
         state.currentMonster = null;
         state.monsterHp = 0;
         state.monsterMaxHp = 0;
@@ -635,6 +785,189 @@ function scheduleCloudSave() {
   if (!cloudReady) return;
   if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
   cloudSyncTimer = setTimeout(cloudSave, 5000);
+}
+
+// ==================== 宝石 ====================
+function getGemCount(key) { return state.gems[key] || 0; }
+function addGem(key, count = 1) { state.gems[key] = (state.gems[key] || 0) + count; }
+
+function getGemBonus() {
+  let bonus = { atk: 0, crit: 0, lifesteal: 0, gold: 0, exp: 0, drop: 0 };
+  Object.values(state.equipment).filter(Boolean).forEach(item => {
+    (item.gems || []).forEach(gemKey => {
+      const g = GEMS.find(x => x.key === gemKey);
+      if (g) bonus[g.attr] += g.value;
+    });
+  });
+  return bonus;
+}
+
+function socketGem(item, gemKey) {
+  if (!item.gemSlots) item.gemSlots = 0;
+  if (!item.gems) item.gems = [];
+  if (item.gems.length >= item.gemSlots) { log("该装备没有空余孔位", "danger"); return false; }
+  if (getGemCount(gemKey) <= 0) { log("没有该宝石", "danger"); return false; }
+  state.gems[gemKey]--;
+  item.gems.push(gemKey);
+  recalcPower();
+  const g = GEMS.find(x => x.key === gemKey);
+  log(`镶嵌【${g.name}】到【${item.name}】`, "gem");
+  return true;
+}
+
+function unsocketGem(item, index) {
+  if (!item.gems || index >= item.gems.length) return;
+  const gemKey = item.gems[index];
+  item.gems.splice(index, 1);
+  addGem(gemKey, 1);
+  recalcPower();
+  const g = GEMS.find(x => x.key === gemKey);
+  log(`取下【${g.name}】`, "gem");
+}
+
+function dropGem() {
+  const g = pick(GEMS);
+  addGem(g.key, 1);
+  log(`✦ 掉落【${g.name}】`, "gem");
+}
+
+// ==================== 签到 ====================
+function checkSign() {
+  const t = today();
+  const s = state.sign || { lastDate: "", streak: 0, days: [] };
+  if (s.lastDate === t) {
+    return { canSign: false, streak: s.streak, days: s.days };
+  }
+  // 判断是否连续
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const y = `${yesterday.getFullYear()}-${yesterday.getMonth()+1}-${yesterday.getDate()}`;
+  let streak = s.streak || 0;
+  if (s.lastDate !== y) streak = 0; // 断签
+  return { canSign: true, streak: streak, days: s.days || [] };
+}
+
+function doSign() {
+  const t = today();
+  const s = state.sign || { lastDate: "", streak: 0, days: [] };
+  if (s.lastDate === t) { log("今天已经签到过了", "danger"); return; }
+
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const y = `${yesterday.getFullYear()}-${yesterday.getMonth()+1}-${yesterday.getDate()}`;
+  if (s.lastDate !== y) s.streak = 0;
+  s.streak++;
+  s.lastDate = t;
+  if (!s.days) s.days = [];
+  s.days.push(t);
+  if (s.days.length > 7) s.days = s.days.slice(-7);
+  state.sign = s;
+
+  // 连续 7 天额外大奖
+  const rewards = [`修为 +${50 * s.streak}`, `灵石 +${30 * s.streak}`];
+  state.exp += 50 * s.streak;
+  state.gold += 30 * s.streak;
+
+  if (s.streak >= 7) {
+    // 送一颗随机宝石
+    const g = pick(GEMS);
+    addGem(g.key, 1);
+    log(`🎁 连续签到 7 天！额外获得【${g.name}】×1`, "gem");
+    s.streak = 0; // 重置连击
+  }
+
+  log(`📅 签到成功！连续 ${s.streak} 天，获得${rewards.join("，")}`, "gold");
+  renderSign();
+  updateUI();
+}
+
+function renderSign() {
+  const info = checkSign();
+  const grid = document.getElementById("signGrid");
+  const desc = document.getElementById("signDesc");
+  grid.innerHTML = "";
+  const t = today();
+  const days = info.days || [];
+  for (let i = 0; i < 7; i++) {
+    const div = document.createElement("div");
+    div.className = "sign-day";
+    if (days.includes(t) && i === days.length - 1) div.classList.add("today");
+    else if (i < days.length) div.classList.add("done");
+    div.textContent = `第${i+1}天`;
+    grid.appendChild(div);
+  }
+  desc.textContent = info.canSign
+    ? `连续签到第 ${info.streak} 天，点击下方按钮领取今日奖励。`
+    : `今日已签到，连续第 ${info.streak} 天。`;
+  document.getElementById("signBtn").disabled = !info.canSign;
+}
+
+// ==================== 功法 ====================
+function learnSkill(key) {
+  const skill = SKILLS.find(s => s.key === key);
+  if (!skill) return;
+  if (state.skillPoints < skill.cost) { log("功法点数不足", "danger"); return; }
+  state.skillPoints -= skill.cost;
+  state.skills[key] = { level: 1 };
+  log(`学会功法【${skill.name}】`, "epic");
+  renderSkills();
+  recalcPower();
+}
+
+function levelUpSkill(key) {
+  const skill = SKILLS.find(s => s.key === key);
+  const owned = state.skills[key];
+  if (!owned || owned.level >= skill.maxLv) return;
+  if (state.skillPoints < skill.cost) { log("功法点数不足", "danger"); return; }
+  state.skillPoints -= skill.cost;
+  owned.level++;
+  log(`【${skill.name}】升级到 ${owned.level} 级`, "epic");
+  renderSkills();
+  recalcPower();
+}
+
+function getSkillBonus() {
+  const bonus = { power: 0, hp: 0, lifesteal: 0, crit: 0, exp: 0, gold: 0 };
+  Object.entries(state.skills || {}).forEach(([key, data]) => {
+    const skill = SKILLS.find(s => s.key === key);
+    if (!skill) return;
+    Object.entries(skill.effect).forEach(([k, v]) => {
+      bonus[k] = (bonus[k] || 0) + v * data.level;
+    });
+  });
+  return bonus;
+}
+
+function renderSkills() {
+  const list = document.getElementById("skillList");
+  list.innerHTML = "";
+  document.getElementById("skillCount").textContent = Object.keys(state.skills || {}).length;
+  SKILLS.forEach(skill => {
+    const owned = state.skills[skill.key];
+    const div = document.createElement("div");
+    div.className = "skill-item";
+    if (owned) {
+      div.innerHTML = `
+        <div class="name">${skill.name} <span style="color:#ffd700">Lv.${owned.level}</span></div>
+        <div class="desc">${skill.desc}</div>
+        <div class="lv">当前效果：${Object.entries(skill.effect).map(([k,v]) => `${k} +${(v*owned.level*100).toFixed(0)}%`).join("，")}</div>
+        <button data-skill-up="${skill.key}" ${owned.level >= skill.maxLv ? "disabled" : ""}>
+          ${owned.level >= skill.maxLv ? "已满级" : `升级（${skill.cost} 点）`}
+        </button>
+      `;
+    } else {
+      div.innerHTML = `
+        <div class="name">${skill.name}</div>
+        <div class="desc">${skill.desc}</div>
+        <button data-skill-learn="${skill.key}">学习（${skill.cost} 点）</button>
+      `;
+    }
+    list.appendChild(div);
+  });
+  list.querySelectorAll("[data-skill-learn]").forEach(btn => {
+    btn.addEventListener("click", () => learnSkill(btn.dataset.skillLearn));
+  });
+  list.querySelectorAll("[data-skill-up]").forEach(btn => {
+    btn.addEventListener("click", () => levelUpSkill(btn.dataset.skillUp));
+  });
 }
 
 // ==================== 装备生成 ====================
@@ -681,14 +1014,13 @@ function generateEquip(forceQuality, boost) {
     maxLevel: quality.maxLv,
     enhanceCost: quality.enhanceCost,
     affixes: affixes,
+    gems: [],
+    gemSlots: quality.gemSlots,
   };
 }
 
 function rerollRandomAffix() {
-  if (state.inventory.length === 0) {
-    log("背包里没有可洗练的装备", "danger");
-    return;
-  }
+  if (state.inventory.length === 0) { log("背包里没有可洗练的装备", "danger"); return; }
   const candidates = state.inventory.filter(i => i.affixes.length > 0);
   if (candidates.length === 0) { log("没有可洗练的装备", "danger"); return; }
   const item = pick(candidates);
@@ -720,6 +1052,23 @@ function calcEquipStats() {
       else if (a.key === "power") power += safeNum(item.power) * v;
     });
   });
+
+  // 宝石加成
+  const gemBonus = getGemBonus();
+  crit += gemBonus.crit;
+  lifesteal += gemBonus.lifesteal;
+  expBonus += gemBonus.exp;
+  goldBonus += gemBonus.gold;
+  dropBonus += gemBonus.drop;
+
+  // 功法加成
+  const skillBonus = getSkillBonus();
+  power *= (1 + skillBonus.power);
+  hpBonus += skillBonus.hp;
+  crit += skillBonus.crit;
+  lifesteal += skillBonus.lifesteal;
+  expBonus += skillBonus.exp;
+  goldBonus += skillBonus.gold;
 
   const names = equipped.map(i => i.name);
   let setBonus = { active: false, count: 0, name: "" };
@@ -762,6 +1111,7 @@ function recalcPower() {
   state.maxStamina = Math.max(100, safeNum(state.maxStamina, 100));
   state.kills = Math.max(0, safeNum(state.kills));
   state.sectPoint = Math.max(0, safeNum(state.sectPoint));
+  state.skillPoints = Math.max(0, safeNum(state.skillPoints));
 }
 
 // ==================== 装备操作 ====================
@@ -804,6 +1154,8 @@ function sellItem(item) {
   const quality = QUALITY.find(q => q.name === item.quality);
   let price = Math.floor(quality.price * (1 + item.level * 0.2));
   (item.affixes || []).forEach(a => { if (a.key === "gold") price = Math.floor(price * (1 + safeNum(a.value))); });
+  // 宝石返还
+  (item.gems || []).forEach(g => addGem(g, 1));
   state.gold += price;
   state.inventory = state.inventory.filter(i => i.id !== item.id);
   log(`出售【${item.quality}·${item.name}】，获得 ${price} 灵石`, "gold");
@@ -813,17 +1165,14 @@ function sellItem(item) {
 
 function sellByQuality(quality) {
   const items = state.inventory.filter(i => i.quality === quality);
-  if (items.length === 0) {
-    log(`背包里没有${quality}装备`, "danger");
-    return;
-  }
+  if (items.length === 0) { log(`背包里没有${quality}装备`, "danger"); return; }
   const qualityDef = QUALITY.find(q => q.name === quality);
   let totalGold = 0;
   items.forEach(item => {
     let price = Math.floor(qualityDef.price * (1 + item.level * 0.2));
-    (item.affixes || []).forEach(a => {
-      if (a.key === "gold") price = Math.floor(price * (1 + safeNum(a.value)));
-    });
+    (item.affixes || []).forEach(a => { if (a.key === "gold") price = Math.floor(price * (1 + safeNum(a.value))); });
+    // 宝石返还
+    (item.gems || []).forEach(g => addGem(g, 1));
     totalGold += price;
   });
   state.inventory = state.inventory.filter(i => i.quality !== quality);
@@ -905,6 +1254,25 @@ function renderInventory() {
     list.appendChild(div);
   }
 
+  // 宝石背包
+  const gemKeys = Object.keys(state.gems).filter(k => state.gems[k] > 0);
+  if (gemKeys.length > 0) {
+    const title = document.createElement("div");
+    title.style.cssText = "color:#888;font-size:11px;margin:6px 0 4px;";
+    title.textContent = "— 宝石背包 —";
+    list.appendChild(title);
+    const gemRow = document.createElement("div");
+    gemRow.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;";
+    gemKeys.forEach(k => {
+      const g = GEMS.find(x => x.key === k);
+      const span = document.createElement("span");
+      span.style.cssText = `background:#0e0e12;border:1px solid #2a2a35;border-radius:4px;padding:4px 8px;font-size:11px;color:${g.color};`;
+      span.textContent = `${g.name} ×${state.gems[k]}`;
+      gemRow.appendChild(span);
+    });
+    list.appendChild(gemRow);
+  }
+
   if (equipped.length > 0) {
     const title = document.createElement("div");
     title.style.cssText = "color:#888;font-size:11px;margin:6px 0 4px;";
@@ -923,7 +1291,7 @@ function renderInventory() {
     sorted.forEach(item => list.appendChild(renderItemRow(item, "bag")));
   }
 
-  if (equipped.length === 0 && state.inventory.length === 0) {
+  if (equipped.length === 0 && state.inventory.length === 0 && gemKeys.length === 0) {
     list.innerHTML = '<div class="empty">背包空空如也</div>';
   }
 }
@@ -933,12 +1301,28 @@ function renderItemRow(item, mode) {
   div.className = "item " + item.quality;
   const lvText = item.level > 0 ? ` <span class="lvup">+${item.level}</span>` : "";
   const enhanceCost = item.enhanceCost * (item.level + 1);
-  // 关键修复：从 AFFIXES 里现查 format 函数，不用存档里的
   const affixText = (item.affixes || []).map(a => {
     const def = AFFIXES.find(d => d.key === a.key);
     return def ? def.format(safeNum(a.value)) : `${a.name || a.key} +${(safeNum(a.value)*100).toFixed(1)}%`;
   }).join(" · ");
   const affixLine = affixText ? `<div class="stat-line">${affixText}</div>` : "";
+
+  // 宝石孔显示
+  const slots = item.gemSlots || 0;
+  const gemsArr = item.gems || [];
+  let gemLine = "";
+  if (slots > 0) {
+    const slotTexts = [];
+    for (let i = 0; i < slots; i++) {
+      if (i < gemsArr.length) {
+        const g = GEMS.find(x => x.key === gemsArr[i]);
+        slotTexts.push(`<span style="color:${g.color};cursor:pointer;" data-unsocket="${item.id}:${i}">◆${g.name}</span>`);
+      } else {
+        slotTexts.push(`<span style="color:#444;">◇空</span>`);
+      }
+    }
+    gemLine = `<div class="gem-line">孔位：${slotTexts.join(" ")}</div>`;
+  }
 
   let buttons = "";
   if (mode === "equipped") {
@@ -951,13 +1335,20 @@ function renderItemRow(item, mode) {
     `;
   }
 
+  // 孔位可以镶嵌宝石
+  let socketButton = "";
+  if (slots > 0 && gemsArr.length < slots) {
+    socketButton = `<button class="gem" data-socket="${item.id}">镶嵌</button>`;
+  }
+
   div.innerHTML = `
     <div style="flex:1;min-width:0;">
       <div class="name">${item.quality}·${item.name}${lvText}</div>
       <div class="attr">${item.slotLabel} · 战力 +${item.power}</div>
       ${affixLine}
+      ${gemLine}
     </div>
-    <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">${buttons}</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">${buttons}${socketButton}</div>
   `;
   return div;
 }
@@ -966,51 +1357,125 @@ function bindInventoryEvents() {
   const list = document.getElementById("inventoryList");
   list.addEventListener("click", e => {
     const btn = e.target.closest("button");
-    if (!btn) return;
-    if (btn.dataset.equip) {
-      const id = parseFloat(btn.dataset.equip);
-      const item = state.inventory.find(i => i.id === id);
-      if (item) equipItem(item);
-    } else if (btn.dataset.unequip) {
-      unequipItem(btn.dataset.unequip);
-    } else if (btn.dataset.enhance) {
-      const id = parseFloat(btn.dataset.enhance);
-      const item = state.inventory.find(i => i.id === id);
-      if (item && enhanceEquip(item)) renderInventory();
-    } else if (btn.dataset.sell) {
-      const id = parseFloat(btn.dataset.sell);
-      const item = state.inventory.find(i => i.id === id);
-      if (item) sellItem(item);
+    if (btn) {
+      if (btn.dataset.equip) {
+        const id = parseFloat(btn.dataset.equip);
+        const item = state.inventory.find(i => i.id === id);
+        if (item) equipItem(item);
+      } else if (btn.dataset.unequip) {
+        unequipItem(btn.dataset.unequip);
+      } else if (btn.dataset.enhance) {
+        const id = parseFloat(btn.dataset.enhance);
+        const item = state.inventory.find(i => i.id === id);
+        if (item && enhanceEquip(item)) renderInventory();
+      } else if (btn.dataset.sell) {
+        const id = parseFloat(btn.dataset.sell);
+        const item = state.inventory.find(i => i.id === id);
+        if (item) sellItem(item);
+      } else if (btn.dataset.socket) {
+        const id = parseFloat(btn.dataset.socket);
+        const item = [...state.inventory, ...Object.values(state.equipment)].find(i => i && i.id === id);
+        if (item) openSocketPanel(item);
+      }
+      return;
+    }
+    // 点击宝石图标卸下
+    const gemSpan = e.target.closest("[data-unsocket]");
+    if (gemSpan) {
+      const [idStr, idxStr] = gemSpan.dataset.unsocket.split(":");
+      const id = parseFloat(idStr);
+      const idx = parseInt(idxStr);
+      const item = [...state.inventory, ...Object.values(state.equipment)].find(i => i && i.id === id);
+      if (item) {
+        unsocketGem(item, idx);
+        renderInventory();
+        updateUI();
+      }
     }
   });
 }
 
-function renderShop() {
+function openSocketPanel(item) {
+  // 列出可用宝石
+  const gemKeys = Object.keys(state.gems).filter(k => state.gems[k] > 0);
+  if (gemKeys.length === 0) { log("没有可镶嵌的宝石", "danger"); return; }
+  const gemList = gemKeys.map(k => {
+    const g = GEMS.find(x => x.key === k);
+    return `${g.name}(×${state.gems[k]})`;
+  }).join("、");
+  const chosen = prompt(`选择要镶嵌的宝石（输入名称）：\n${gemList}\n\n可选：${gemKeys.map(k => GEMS.find(x => x.key === k).name).join(" / ")}`);
+  if (!chosen) return;
+  const gem = GEMS.find(g => g.name === chosen.trim());
+  if (!gem) { log("宝石名称不正确", "danger"); return; }
+  if (socketGem(item, gem.key)) {
+    renderInventory();
+    updateUI();
+  }
+}
+
+function renderShop(sub = "normal") {
   const list = document.getElementById("shopList");
   list.innerHTML = "";
-  SHOP_ITEMS.forEach((item, index) => {
-    const div = document.createElement("div");
-    div.className = "shop-item";
-    div.innerHTML = `
-      <div>
-        <div class="name" style="color:#ccc;font-size:12px;">${item.name}</div>
-        <div class="attr" style="color:#888;font-size:10px;">${item.desc}</div>
-      </div>
-      <button data-buy="${index}">${item.price} 灵石</button>
-    `;
-    list.appendChild(div);
-  });
-  list.querySelectorAll("[data-buy]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const index = parseInt(btn.dataset.buy);
-      const item = SHOP_ITEMS[index];
-      if (state.gold >= item.price) {
-        state.gold -= item.price;
-        item.action();
-        updateUI();
-      } else log("灵石不足！", "danger");
+  if (sub === "normal") {
+    SHOP_ITEMS.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "shop-item";
+      div.innerHTML = `
+        <div>
+          <div class="name" style="color:#ccc;font-size:12px;">${item.name}</div>
+          <div class="attr" style="color:#888;font-size:10px;">${item.desc}</div>
+        </div>
+        <button data-buy="${index}">${item.price} 灵石</button>
+      `;
+      list.appendChild(div);
     });
-  });
+    list.querySelectorAll("[data-buy]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.buy);
+        const item = SHOP_ITEMS[index];
+        if (state.gold >= item.price) {
+          state.gold -= item.price;
+          item.action();
+          updateUI();
+        } else log("灵石不足！", "danger");
+      });
+    });
+  } else {
+    // 宝石商店
+    GEM_SHOP.forEach((item, index) => {
+      const g = item.random ? null : GEMS.find(x => x.key === item.key);
+      const div = document.createElement("div");
+      div.className = "shop-item";
+      div.innerHTML = `
+        <div>
+          <div class="name" style="color:${g ? g.color : "#fff"};font-size:12px;">${g ? g.name : "随机宝石"}</div>
+          <div class="attr" style="color:#888;font-size:10px;">${g ? g.desc : "随机获得一颗宝石"}</div>
+        </div>
+        <button data-buy-gem="${index}">${item.price} 灵石</button>
+      `;
+      list.appendChild(div);
+    });
+    list.querySelectorAll("[data-buy-gem]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.buyGem);
+        const item = GEM_SHOP[index];
+        if (state.gold >= item.price) {
+          state.gold -= item.price;
+          if (item.random) {
+            const g = pick(GEMS);
+            addGem(g.key, 1);
+            log(`购买随机宝石，获得【${g.name}】`, "gem");
+          } else {
+            addGem(item.key, item.count);
+            const g = GEMS.find(x => x.key === item.key);
+            log(`购买【${g.name}】×${item.count}`, "gem");
+          }
+          updateUI();
+          renderInventory();
+        } else log("灵石不足！", "danger");
+      });
+    });
+  }
 }
 
 function renderZones() {
@@ -1106,9 +1571,11 @@ function fightTick() {
     state.stone += m.stone;
     state.kills++;
     state.sectQuestProgress++;
+    // 功法点数
+    state.skillPoints = (state.skillPoints || 0) + (state.isBoss ? 3 : 1);
 
     const critText = isCrit ? " [暴击]" : "";
-    log(`击败【${m.name}】${critText}，修为 +${fmt(expGain)}，灵石 +${fmt(goldGain)}，强化石 +${m.stone}`, isCrit ? "legend" : "");
+    log(`击败【${m.name}】${critText}，修为 +${fmt(expGain)}，灵石 +${fmt(goldGain)}，强化石 +${m.stone}，功法点 +${state.isBoss ? 3 : 1}`, isCrit ? "legend" : "");
 
     const dropRate = Math.min(0.95, m.dropRate + state.dropBonus);
     if (Math.random() < dropRate) {
@@ -1116,6 +1583,8 @@ function fightTick() {
       state.inventory.push(eq);
       log(`✦ 掉落【${eq.quality}·${eq.name}】，战力 +${eq.power}`, eq.qualityColor);
     }
+    // 掉落宝石（10% 概率）
+    if (Math.random() < 0.10) dropGem();
 
     if (state.sectQuestProgress >= state.sectQuestTarget) {
       state.sectPoint += 10;
@@ -1217,6 +1686,7 @@ function saveGame() {
   state.stamina = Math.max(0, safeNum(state.stamina));
   state.kills = Math.max(0, safeNum(state.kills));
   state.sectPoint = Math.max(0, safeNum(state.sectPoint));
+  state.skillPoints = Math.max(0, safeNum(state.skillPoints));
   state.monsterHp = safeNum(state.monsterHp);
   state.monsterMaxHp = safeNum(state.monsterMaxHp, 1);
   localStorage.setItem("xiuxian_arpg_save", JSON.stringify(extractSaveData()));
@@ -1239,12 +1709,16 @@ function loadGame() {
       state.maxStamina = Math.max(100, safeNum(state.maxStamina, 100));
       state.kills = Math.max(0, safeNum(state.kills));
       state.sectPoint = Math.max(0, safeNum(state.sectPoint));
+      state.skillPoints = Math.max(0, safeNum(state.skillPoints));
       state.reincarnCount = Math.max(0, safeNum(state.reincarnCount));
       state.reincarnBonus = Math.max(0, safeNum(state.reincarnBonus));
       state.realmIndex = Math.max(0, Math.min(REALMS.length - 1, safeNum(state.realmIndex)));
       state.currentZone = Math.max(0, Math.min(ZONES.length - 1, safeNum(state.currentZone)));
       state.inventory = Array.isArray(state.inventory) ? state.inventory : [];
       state.equipment = state.equipment || { weapon: null, armor: null, accessory: null };
+      state.gems = state.gems || {};
+      state.skills = state.skills || {};
+      state.sign = state.sign || { lastDate: "", streak: 0, days: [] };
       recalcPower();
     } catch (e) { console.warn("存档读取失败"); }
   }
@@ -1305,9 +1779,22 @@ document.querySelectorAll(".tab").forEach(tab => {
     tab.classList.add("active");
     document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
     if (tab.dataset.tab === "inventory") renderInventory();
-    if (tab.dataset.tab === "shop") renderShop();
+    if (tab.dataset.tab === "shop") renderShop(currentShopTab);
+    if (tab.dataset.tab === "skill") renderSkills();
   });
 });
+
+let currentShopTab = "normal";
+document.querySelectorAll(".sub-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".sub-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    currentShopTab = tab.dataset.sub;
+    renderShop(currentShopTab);
+  });
+});
+
+document.getElementById("signBtn").addEventListener("click", doSign);
 
 document.getElementById("sectTaskBtn").addEventListener("click", () => {
   if (state.sectPoint >= 20) { state.sectPoint -= 20; state.sectQuestTarget += 5; log("接取高级宗门任务，目标提升", "rare"); }
@@ -1332,11 +1819,13 @@ async function init() {
   loadGame();
   bindInventoryEvents();
   log("你于洞府中睁开双眼，开始了偷偷摸摸的修仙之路……");
-  log("提示：每个大境界分九层，修为需求指数级增长，越往后越难。", "rare");
+  log("提示：击杀怪物可获得功法点，去【功法】面板学技能；装备孔位可镶嵌宝石。", "rare");
   spawnMonster();
   renderZones();
   renderInventory();
   renderShop();
+  renderSkills();
+  renderSign();
   updateUI();
 
   updateSyncStatus("云端存档：连接中…", "");
@@ -1349,6 +1838,8 @@ async function init() {
     updateUI();
     renderInventory();
     renderZones();
+    renderSkills();
+    renderSign();
   } else {
     updateSyncStatus("云端存档：首次上传", "");
     await cloudSave();
