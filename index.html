@@ -575,7 +575,6 @@ function log(msg, cls = "") {
 let cloudReady = false;
 let cloudSyncTimer = null;
 
-// 提取需要保存的玩家数据（去掉怪物等临时状态）
 function extractSaveData() {
   const d = { ...state };
   delete d.currentMonster;
@@ -611,14 +610,18 @@ async function cloudLoad() {
       const data = await res.json();
       if (data && data.state) {
         Object.assign(state, data.state);
+        // 关键：云端载入后，强制清除旧存档里的怪物状态，避免画面卡死
+        state.currentMonster = null;
+        state.monsterHp = 0;
+        state.monsterMaxHp = 0;
+        state.isBoss = false;
+        state.bossType = null;
         recalcPower();
         updateSyncStatus("云端存档：已载入", "ok");
         return true;
       }
     }
-  } catch (e) {
-    // 未登录或首次访问，忽略
-  }
+  } catch (e) {}
   return false;
 }
 
@@ -1338,7 +1341,7 @@ async function init() {
   const hasCloud = await cloudLoad();
   if (hasCloud) {
     log("已从云端载入存档", "gold");
-    // 云端存档不含怪物状态，重新生成怪物
+    // 云端存档不含怪物状态，如果缺失或非法，重新生成
     if (!state.currentMonster || !isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) {
       spawnMonster();
     }
@@ -1346,7 +1349,6 @@ async function init() {
     renderInventory();
     renderZones();
   } else {
-    // 云端没有存档，说明是第一次玩，把本地的推上去
     updateSyncStatus("云端存档：首次上传", "");
     await cloudSave();
   }
