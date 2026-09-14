@@ -579,7 +579,7 @@ let lastCloudSave = 0;
 async function cloudSave() {
   if (!cloudReady) return;
   try {
-    const res = await fetch("/api/sync", {
+    const res = await fetch("/.netlify/functions/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data: state }),
@@ -597,7 +597,7 @@ async function cloudSave() {
 
 async function cloudLoad() {
   try {
-    const res = await fetch("/api/sync");
+    const res = await fetch("/.netlify/functions/sync");
     if (res.ok) {
       const data = await res.json();
       if (data && data.state) {
@@ -1263,7 +1263,7 @@ function resetGame() {
   localStorage.removeItem("xiuxian_arpg_time");
   // 同时清云端
   cloudReady = true;
-  fetch("/api/sync", {
+  fetch("/api/sy/.netlify/functions/sync", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ data: null }),
