@@ -102,7 +102,7 @@
   .battle-title .boss-tag { color: #ff6b6b; font-weight: bold; }
 
   #log {
-    height: 140px;
+    height: 120px;
     overflow-y: auto;
     background: #0e0e12;
     border: 1px solid #2a2a35;
@@ -123,8 +123,8 @@
   .danger { color: #f14c4c; }
   .gold   { color: #ffd700; }
   .myth   { color: #ff6b6b; font-weight: bold; text-shadow: 0 0 6px #ff6b6b; }
-  .set    { color: #6affd8; font-weight: bold; }
   .gem    { color: #66d9ff; font-weight: bold; }
+  .book   { color: #ffaa00; font-weight: bold; }
 
   .btn {
     width: 100%;
@@ -145,8 +145,9 @@
   .btn.gold:hover:not(:disabled) { background: #b08a0e; }
   .btn.danger { background: #8a2a2a; }
   .btn.danger:hover:not(:disabled) { background: #b03a3a; }
-  .btn.gem { background: #1a6a8a; }
-  .btn.gem:hover:not(:disabled) { background: #2288b0; }
+  .btn.skill { background: #7a3d9c; }
+  .btn.skill:hover:not(:disabled) { background: #9b4dc4; }
+  .btn.skill.cd { background: #333; color: #666; }
 
   .item {
     display: flex;
@@ -165,11 +166,13 @@
   .item.宝品 { border-left-color: #c586c0; }
   .item.仙品 { border-left-color: #dcdcaa; }
   .item.神品 { border-left-color: #ff6b6b; box-shadow: 0 0 8px rgba(255,107,107,0.25); }
+  .item.book { border-left-color: #ffaa00; background: #1f1a0e; }
   .item .name { color: #ccc; font-size: 12px; }
   .item .attr { color: #888; font-size: 10px; margin-top: 2px; }
   .item .lvup { color: #4ec9b0; font-size: 10px; }
   .item .stat-line { color: #6affd8; font-size: 10px; margin-top: 1px; }
   .item .gem-line { color: #66d9ff; font-size: 10px; margin-top: 1px; }
+  .item .book-line { color: #ffaa00; font-size: 10px; margin-top: 1px; }
   .item button {
     background: #0e639c;
     color: #fff;
@@ -187,6 +190,8 @@
   .item button.sell:hover { background: #b04a4a; }
   .item button.gem { background: #1a6a8a; }
   .item button.gem:hover { background: #2288b0; }
+  .item button.learn { background: #8a6d0a; }
+  .item button.learn:hover { background: #b08a0e; }
   .empty { color: #555; text-align: center; padding: 20px; font-size: 12px; }
 
   .toggle {
@@ -207,7 +212,7 @@
   .mini #log, .mini .bar-bg, .mini .tabs, .mini .panel,
   .mini .btn, .mini #inventoryList, .mini #shopList,
   .mini .battle-box, .mini #sellBar, .mini .gem-bar,
-  .mini .sign-bar { display: none; }
+  .mini .sign-bar, .mini .skill-bar { display: none; }
   .mini .mini-info { display: block; }
   .mini { width: 210px; padding: 10px; }
   .mini-info { display: none; }
@@ -317,36 +322,28 @@
     font-size: 10px;
     color: #666;
   }
-  .sign-day.done {
-    background: #1a3a2a;
-    border-color: #2a5a4a;
-    color: #6affd8;
-  }
-  .sign-day.today {
-    background: #3a2a0a;
-    border-color: #6a4a1a;
-    color: #ffd700;
-    font-weight: bold;
-  }
+  .sign-day.done { background: #1a3a2a; border-color: #2a5a4a; color: #6affd8; }
+  .sign-day.today { background: #3a2a0a; border-color: #6a4a1a; color: #ffd700; font-weight: bold; }
 
-  .gem-bar {
+  .skill-bar {
     display: flex;
-    flex-wrap: wrap;
     gap: 4px;
-    margin-bottom: 8px;
+    margin-top: 8px;
   }
-
-  .gem-slot {
-    background: #0e0e12;
-    border: 1px dashed #3a3a48;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 10px;
-    color: #66d9ff;
+  .skill-btn {
+    flex: 1;
+    padding: 8px 4px;
+    background: #3a1a4a;
+    border: 1px solid #6a2a8a;
+    border-radius: 6px;
+    color: #c586c0;
+    font-size: 11px;
     cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
   }
-  .gem-slot.empty { color: #444; }
-  .gem-slot:hover { border-color: #66d9ff; }
+  .skill-btn:hover:not(:disabled) { background: #5a2a6a; color: #e0a0e0; }
+  .skill-btn:disabled { background: #1a1a22; color: #555; border-color: #2a2a35; cursor: not-allowed; }
 
   .skill-item {
     background: #1a1a22;
@@ -388,6 +385,29 @@
     color: #777;
   }
   .sub-tab.active { background: #0e639c; color: #fff; }
+
+  .sect-card {
+    background: #1a1a22;
+    border: 1px solid #3a3a48;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .sect-card.selected { border-color: #ffd700; background: #1f1a0e; }
+  .sect-card h4 { color: #ffd700; font-size: 13px; margin-bottom: 4px; }
+  .sect-card p { color: #888; font-size: 11px; margin-bottom: 6px; line-height: 1.5; }
+  .sect-card button {
+    background: #0e639c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .sect-card button:hover { background: #1177bb; }
+  .sect-card button:disabled { background: #333; color: #666; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -437,6 +457,7 @@
     <div class="row"><span>灵石</span><span id="gold">0</span></div>
     <div class="row"><span>强化石</span><span id="stone">0</span></div>
     <div class="row"><span>击杀</span><span id="kills">0</span></div>
+    <div class="row"><span>流派</span><span id="currentSect">未入门</span></div>
 
     <div class="battle-box">
       <div class="battle-title">
@@ -453,6 +474,8 @@
       <button class="boss-btn" id="bossBtn1" disabled>区域BOSS</button>
       <button class="boss-btn" id="bossBtn2" disabled>世界BOSS</button>
     </div>
+
+    <div class="skill-bar" id="skillBar"></div>
   </div>
 
   <div class="panel" id="panel-inventory">
@@ -478,6 +501,10 @@
     <div class="row"><span>每日任务</span><span id="sectQuest">讨伐 0/5</span></div>
     <button class="btn" id="sectTaskBtn">提升任务目标（20 贡献）</button>
     <button class="btn" id="sectUpgradeBtn">消耗 30 贡献提升基础战力</button>
+    <div style="margin-top:12px;">
+      <div class="row"><span>选择流派</span><span></span></div>
+      <div id="sectSelect"></div>
+    </div>
   </div>
 
   <div class="panel" id="panel-reincarn">
@@ -503,47 +530,37 @@
 <button class="toggle" id="toggleBtn">迷你模式</button>
 
 <script>
-// ==================== 数据 ====================
-const state = {
-  realmIndex: 0,
-  exp: 0,
-  hp: 100,
-  maxHp: 100,
-  stamina: 100,
-  maxStamina: 100,
-  basePower: 10,
-  totalEquipBonus: 0,
-  power: 10,
-  critRate: 0.05,
-  lifesteal: 0,
-  gold: 0,
-  stone: 0,
-  kills: 0,
-  sectPoint: 0,
-  sectQuestProgress: 0,
-  sectQuestTarget: 5,
-  autoBreak: true,
-  inventory: [],
-  equipment: { weapon: null, armor: null, accessory: null },
-  currentZone: 0,
-  currentMonster: null,
-  monsterHp: 0,
-  monsterMaxHp: 0,
-  isBoss: false,
-  bossType: null,
-  reincarnCount: 0,
-  reincarnBonus: 0,
-  setBonus: { active: false, count: 0, name: "" },
-  // 新增
-  gems: {},           // 宝石背包：{ 类型: 数量 }
-  sign: {             // 签到
-    lastDate: "",
-    streak: 0,
-    days: [],         // 最近7天的签到状态
-  },
-  skills: {},         // 已学功法：{ key: { level: n } }
-  skillPoints: 0,     // 功法点数（击杀怪物获得）
-};
+// ==================== 流派定义 ====================
+const SECTS = [
+  { key: "jian", name: "剑修", desc: "高暴击、高单体爆发。技能：万剑归宗（5倍伤害）", skill: "万剑归宗", cd: 30 },
+  { key: "fa",   name: "法修", desc: "高修为、范围伤害。技能：天雷咒（3倍伤害+眩晕）", skill: "天雷咒", cd: 30 },
+  { key: "ti",   name: "体修", desc: "高气血、高减伤。技能：金刚不坏（5秒减伤50%）", skill: "金刚不坏", cd: 30 },
+  { key: "mo",   name: "魔修", desc: "高吸血、高掉宝。技能：血魔功（回血+30%攻击5秒）", skill: "血魔功", cd: 30 },
+];
+
+// ==================== 技能书定义（按境界分级）====================
+const SKILL_BOOKS = [
+  // 炼气期（境界 0-8）
+  { key: "b1", name: "基础剑法", realm: 0, price: 50,  effect: { power: 0.05 }, desc: "战力 +5%（可升级）" },
+  { key: "b2", name: "聚气术",   realm: 0, price: 50,  effect: { exp: 0.05 },   desc: "修为 +5%（可升级）" },
+  { key: "b3", name: "铁布衫",   realm: 0, price: 80,  effect: { hp: 0.08 },    desc: "气血 +8%（可升级）" },
+  // 筑基期（境界 9-17）
+  { key: "b4", name: "御剑术",   realm: 9, price: 200, effect: { crit: 0.03 },  desc: "暴击 +3%（可升级）" },
+  { key: "b5", name: "御灵术",   realm: 9, price: 200, effect: { lifesteal: 0.02 }, desc: "吸血 +2%（可升级）" },
+  { key: "b6", name: "护体金光", realm: 9, price: 250, effect: { hp: 0.12 },    desc: "气血 +12%（可升级）" },
+  // 金丹期（境界 18-26）
+  { key: "b7", name: "万剑诀",   realm: 18, price: 500, effect: { power: 0.10 }, desc: "战力 +10%（可升级）" },
+  { key: "b8", name: "天雷咒",   realm: 18, price: 500, effect: { crit: 0.05 },  desc: "暴击 +5%（可升级）" },
+  { key: "b9", name: "血魔功",   realm: 18, price: 600, effect: { lifesteal: 0.04 }, desc: "吸血 +4%（可升级）" },
+  // 元婴期（境界 27-35）
+  { key: "b10", name: "剑破虚空", realm: 27, price: 1200, effect: { power: 0.15 }, desc: "战力 +15%（可升级）" },
+  { key: "b11", name: "五雷正法", realm: 27, price: 1200, effect: { crit: 0.08 },  desc: "暴击 +8%（可升级）" },
+  { key: "b12", name: "不死金身", realm: 27, price: 1500, effect: { hp: 0.20 },    desc: "气血 +20%（可升级）" },
+  // 化神期（境界 36+）
+  { key: "b13", name: "大五行剑", realm: 36, price: 3000, effect: { power: 0.25 }, desc: "战力 +25%（可升级）" },
+  { key: "b14", name: "九天神雷", realm: 36, price: 3000, effect: { crit: 0.12 },  desc: "暴击 +12%（可升级）" },
+  { key: "b15", name: "混沌魔功", realm: 36, price: 3500, effect: { lifesteal: 0.08 }, desc: "吸血 +8%（可升级）" },
+];
 
 // ==================== 宝石定义 ====================
 const GEMS = [
@@ -565,6 +582,36 @@ const SKILLS = [
   { key: "caiyun",   name: "财运诀",   desc: "灵石 +8%/级",      maxLv: 10, cost: 1, effect: { gold: 0.08 } },
 ];
 
+// ==================== 数据 ====================
+const state = {
+  realmIndex: 0, exp: 0, hp: 100, maxHp: 100,
+  stamina: 100, maxStamina: 100,
+  basePower: 10, totalEquipBonus: 0, power: 10,
+  critRate: 0.05, lifesteal: 0,
+  gold: 0, stone: 0, kills: 0,
+  sectPoint: 0, sectQuestProgress: 0, sectQuestTarget: 5,
+  autoBreak: true,
+  inventory: [],
+  equipment: { weapon: null, armor: null, accessory: null },
+  currentZone: 0, currentMonster: null, monsterHp: 0, monsterMaxHp: 0,
+  isBoss: false, bossType: null,
+  reincarnCount: 0, reincarnBonus: 0,
+  setBonus: { active: false, count: 0, name: "" },
+  gems: {},
+  sign: { lastDate: "", streak: 0, days: [] },
+  skills: {},
+  skillPoints: 0,
+  // 新增
+  sect: null,                  // 当前流派
+  skillCooldown: 0,            // 主动技能冷却（秒）
+  buffAtk: 0,                  // 攻击 buff 持续时间（秒）
+  buffAtkValue: 0,             // 攻击 buff 数值
+  buffDef: 0,                  // 减伤 buff 持续时间
+  stunTimer: 0,                // 怪物眩晕时间
+  knownBooks: {},              // 已学技能书 { key: level }
+  bossKillCount: 0,            // Boss 击杀数（用于技能书掉落统计）
+};
+
 // ==================== 新境界体系 ====================
 const BIG_REALMS = [
   { name: "炼气期", baseNeed: 50,           basePower: 5 },
@@ -578,14 +625,17 @@ const BIG_REALMS = [
   { name: "渡劫期", baseNeed: 15000000000,  basePower: 500000000 },
   { name: "仙人期", baseNeed: 100000000000, basePower: 4000000000 },
 ];
-
 const REALMS = [];
 BIG_REALMS.forEach((big, bigIdx) => {
   for (let sub = 1; sub <= 9; sub++) {
     const progress = (sub - 1) / 8;
-    const need = Math.floor(big.baseNeed * (1 + progress * 2));
-    const power = Math.floor(big.basePower * (1 + progress * 2));
-    REALMS.push({ name: big.name + sub + "层", big: big.name, sub, need, power, bigIndex: bigIdx });
+    REALMS.push({
+      name: big.name + sub + "层",
+      big: big.name, sub,
+      need: Math.floor(big.baseNeed * (1 + progress * 2)),
+      power: Math.floor(big.basePower * (1 + progress * 2)),
+      bigIndex: bigIdx,
+    });
   }
 });
 
@@ -640,8 +690,8 @@ const MONSTERS = {
 };
 
 const BOSSES = {
-  zone: { name: "区域BOSS", hpMult: 3, atkMult: 1.8, expMult: 3, goldMult: 4, stoneMult: 3, dropRate: 1.0, qualityBoost: 1 },
-  world: { name: "世界BOSS", hpMult: 8, atkMult: 3, expMult: 8, goldMult: 10, stoneMult: 6, dropRate: 1.0, qualityBoost: 2 },
+  zone: { name: "区域BOSS", hpMult: 3, atkMult: 1.8, expMult: 3, goldMult: 4, stoneMult: 3, dropRate: 1.0, qualityBoost: 1, bookDropRate: 0.05 },
+  world: { name: "世界BOSS", hpMult: 8, atkMult: 3, expMult: 8, goldMult: 10, stoneMult: 6, dropRate: 1.0, qualityBoost: 2, bookDropRate: 0.15 },
 };
 
 const EQUIP_SLOTS = [
@@ -703,7 +753,6 @@ function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + m
 function randFloat(min, max) { return Math.random() * (max - min) + min; }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function today() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
-
 function fmt(n) {
   const num = Number(n);
   if (!isFinite(num)) return "0";
@@ -711,12 +760,10 @@ function fmt(n) {
   if (num >= 10000) return (num / 10000).toFixed(2) + "万";
   return Math.floor(num).toLocaleString("en-US");
 }
-
 function safeNum(n, fallback = 0) {
   const num = Number(n);
   return isFinite(num) ? num : fallback;
 }
-
 function log(msg, cls = "") {
   const logEl = document.getElementById("log");
   const div = document.createElement("div");
@@ -730,17 +777,12 @@ function log(msg, cls = "") {
 // ==================== 云端存档 ====================
 let cloudReady = false;
 let cloudSyncTimer = null;
-
 function extractSaveData() {
   const d = { ...state };
-  delete d.currentMonster;
-  delete d.monsterHp;
-  delete d.monsterMaxHp;
-  delete d.isBoss;
-  delete d.bossType;
+  delete d.currentMonster; delete d.monsterHp; delete d.monsterMaxHp;
+  delete d.isBoss; delete d.bossType;
   return d;
 }
-
 async function cloudSave() {
   if (!cloudReady) return;
   try {
@@ -753,7 +795,6 @@ async function cloudSave() {
     else updateSyncStatus("云端存档：同步失败", "err");
   } catch (e) { updateSyncStatus("云端存档：离线", "err"); }
 }
-
 async function cloudLoad() {
   try {
     const res = await fetch("/api/sync");
@@ -774,13 +815,11 @@ async function cloudLoad() {
   } catch (e) {}
   return false;
 }
-
 function updateSyncStatus(text, cls = "") {
   const el = document.getElementById("syncStatus");
   el.textContent = text;
   el.className = "sync-status " + cls;
 }
-
 function scheduleCloudSave() {
   if (!cloudReady) return;
   if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
@@ -790,7 +829,6 @@ function scheduleCloudSave() {
 // ==================== 宝石 ====================
 function getGemCount(key) { return state.gems[key] || 0; }
 function addGem(key, count = 1) { state.gems[key] = (state.gems[key] || 0) + count; }
-
 function getGemBonus() {
   let bonus = { atk: 0, crit: 0, lifesteal: 0, gold: 0, exp: 0, drop: 0 };
   Object.values(state.equipment).filter(Boolean).forEach(item => {
@@ -801,7 +839,6 @@ function getGemBonus() {
   });
   return bonus;
 }
-
 function socketGem(item, gemKey) {
   if (!item.gemSlots) item.gemSlots = 0;
   if (!item.gems) item.gems = [];
@@ -814,7 +851,6 @@ function socketGem(item, gemKey) {
   log(`镶嵌【${g.name}】到【${item.name}】`, "gem");
   return true;
 }
-
 function unsocketGem(item, index) {
   if (!item.gems || index >= item.gems.length) return;
   const gemKey = item.gems[index];
@@ -824,33 +860,52 @@ function unsocketGem(item, index) {
   const g = GEMS.find(x => x.key === gemKey);
   log(`取下【${g.name}】`, "gem");
 }
-
 function dropGem() {
   const g = pick(GEMS);
   addGem(g.key, 1);
   log(`✦ 掉落【${g.name}】`, "gem");
 }
 
+// ==================== 技能书 ====================
+function getAvailableBooks() {
+  return SKILL_BOOKS.filter(b => state.realmIndex >= b.realm);
+}
+function learnBook(bookKey) {
+  const book = SKILL_BOOKS.find(b => b.key === bookKey);
+  if (!book) return;
+  if (!state.knownBooks[bookKey]) state.knownBooks[bookKey] = 0;
+  if (state.knownBooks[bookKey] >= 5) { log("该技能书已达最高等级", "danger"); return; }
+  state.knownBooks[bookKey]++;
+  log(`学习【${book.name}】成功，等级 ${state.knownBooks[bookKey]}`, "book");
+  recalcPower();
+}
+function getBookBonus() {
+  let bonus = { power: 0, hp: 0, lifesteal: 0, crit: 0, exp: 0, gold: 0 };
+  Object.entries(state.knownBooks || {}).forEach(([key, lv]) => {
+    const book = SKILL_BOOKS.find(b => b.key === key);
+    if (!book) return;
+    Object.entries(book.effect).forEach(([k, v]) => {
+      bonus[k] = (bonus[k] || 0) + v * lv;
+    });
+  });
+  return bonus;
+}
+
 // ==================== 签到 ====================
 function checkSign() {
   const t = today();
   const s = state.sign || { lastDate: "", streak: 0, days: [] };
-  if (s.lastDate === t) {
-    return { canSign: false, streak: s.streak, days: s.days };
-  }
-  // 判断是否连续
+  if (s.lastDate === t) return { canSign: false, streak: s.streak, days: s.days };
   const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
   const y = `${yesterday.getFullYear()}-${yesterday.getMonth()+1}-${yesterday.getDate()}`;
   let streak = s.streak || 0;
-  if (s.lastDate !== y) streak = 0; // 断签
-  return { canSign: true, streak: streak, days: s.days || [] };
+  if (s.lastDate !== y) streak = 0;
+  return { canSign: true, streak, days: s.days || [] };
 }
-
 function doSign() {
   const t = today();
   const s = state.sign || { lastDate: "", streak: 0, days: [] };
   if (s.lastDate === t) { log("今天已经签到过了", "danger"); return; }
-
   const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
   const y = `${yesterday.getFullYear()}-${yesterday.getMonth()+1}-${yesterday.getDate()}`;
   if (s.lastDate !== y) s.streak = 0;
@@ -860,25 +915,18 @@ function doSign() {
   s.days.push(t);
   if (s.days.length > 7) s.days = s.days.slice(-7);
   state.sign = s;
-
-  // 连续 7 天额外大奖
-  const rewards = [`修为 +${50 * s.streak}`, `灵石 +${30 * s.streak}`];
   state.exp += 50 * s.streak;
   state.gold += 30 * s.streak;
-
   if (s.streak >= 7) {
-    // 送一颗随机宝石
     const g = pick(GEMS);
     addGem(g.key, 1);
     log(`🎁 连续签到 7 天！额外获得【${g.name}】×1`, "gem");
-    s.streak = 0; // 重置连击
+    s.streak = 0;
   }
-
-  log(`📅 签到成功！连续 ${s.streak} 天，获得${rewards.join("，")}`, "gold");
+  log(`📅 签到成功！连续 ${s.streak} 天，获得修为 +${50 * s.streak}，灵石 +${30 * s.streak}`, "gold");
   renderSign();
   updateUI();
 }
-
 function renderSign() {
   const info = checkSign();
   const grid = document.getElementById("signGrid");
@@ -911,7 +959,6 @@ function learnSkill(key) {
   renderSkills();
   recalcPower();
 }
-
 function levelUpSkill(key) {
   const skill = SKILLS.find(s => s.key === key);
   const owned = state.skills[key];
@@ -923,7 +970,6 @@ function levelUpSkill(key) {
   renderSkills();
   recalcPower();
 }
-
 function getSkillBonus() {
   const bonus = { power: 0, hp: 0, lifesteal: 0, crit: 0, exp: 0, gold: 0 };
   Object.entries(state.skills || {}).forEach(([key, data]) => {
@@ -935,7 +981,6 @@ function getSkillBonus() {
   });
   return bonus;
 }
-
 function renderSkills() {
   const list = document.getElementById("skillList");
   list.innerHTML = "";
@@ -970,6 +1015,99 @@ function renderSkills() {
   });
 }
 
+// ==================== 主动技能 ====================
+function useSectSkill() {
+  if (!state.sect) { log("你还没有加入流派，无法使用技能", "danger"); return; }
+  if (state.skillCooldown > 0) { log(`技能冷却中（剩余 ${state.skillCooldown} 秒）`, "danger"); return; }
+  if (!state.currentMonster || state.monsterHp <= 0) { log("没有目标", "danger"); return; }
+  const sect = SECTS.find(s => s.key === state.sect);
+  const reincMult = 1 + safeNum(state.reincarnBonus);
+  let dmg = 0;
+  switch (state.sect) {
+    case "jian":
+      dmg = state.power * 5 * reincMult;
+      state.monsterHp -= dmg;
+      log(`⚔ 释放【万剑归宗】，造成 ${fmt(dmg)} 伤害！`, "legend");
+      break;
+    case "fa":
+      dmg = state.power * 3 * reincMult;
+      state.monsterHp -= dmg;
+      state.stunTimer = 3;
+      log(`⚡ 释放【天雷咒】，造成 ${fmt(dmg)} 伤害，怪物眩晕 3 秒！`, "epic");
+      break;
+    case "ti":
+      state.buffDef = 5;
+      log(`🛡 释放【金刚不坏】，5 秒内受到伤害减半！`, "rare");
+      break;
+    case "mo":
+      state.hp = Math.min(state.maxHp, state.hp + state.maxHp * 0.5);
+      state.buffAtk = 5;
+      state.buffAtkValue = 0.3;
+      log(`🩸 释放【血魔功】，恢复 50% 气血，攻击 +30% 持续 5 秒！`, "myth");
+      break;
+  }
+  state.skillCooldown = sect.cd;
+  renderSkillBar();
+  updateUI();
+}
+
+function renderSkillBar() {
+  const bar = document.getElementById("skillBar");
+  bar.innerHTML = "";
+  if (!state.sect) {
+    const div = document.createElement("div");
+    div.style.cssText = "color:#666;font-size:11px;text-align:center;padding:8px;";
+    div.textContent = "加入流派后可释放技能";
+    bar.appendChild(div);
+    return;
+  }
+  const sect = SECTS.find(s => s.key === state.sect);
+  const btn = document.createElement("button");
+  btn.className = "skill-btn";
+  if (state.skillCooldown > 0) {
+    btn.disabled = true;
+    btn.textContent = `${sect.skill} (${state.skillCooldown}s)`;
+  } else {
+    btn.textContent = `释放【${sect.skill}】`;
+    btn.addEventListener("click", useSectSkill);
+  }
+  bar.appendChild(btn);
+}
+
+// ==================== 流派选择 ====================
+function renderSectSelect() {
+  const box = document.getElementById("sectSelect");
+  box.innerHTML = "";
+  SECTS.forEach(sect => {
+    const card = document.createElement("div");
+    card.className = "sect-card";
+    if (state.sect === sect.key) card.classList.add("selected");
+    card.innerHTML = `
+      <h4>${sect.name}</h4>
+      <p>${sect.desc}</p>
+      <button data-sect="${sect.key}" ${state.sect === sect.key ? "disabled" : ""}>
+        ${state.sect === sect.key ? "当前流派" : "选择"}
+      </button>
+    `;
+    box.appendChild(card);
+  });
+  box.querySelectorAll("[data-sect]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.sect;
+      if (state.sect === key) return;
+      if (state.sect && !confirm("转修流派会重置已学功法，确定吗？")) return;
+      state.sect = key;
+      state.skills = {};
+      const sect = SECTS.find(s => s.key === key);
+      log(`★ 加入【${sect.name}】，学会主动技能【${sect.skill}】`, "legend");
+      renderSectSelect();
+      renderSkillBar();
+      renderSkills();
+      recalcPower();
+    });
+  });
+}
+
 // ==================== 装备生成 ====================
 function generateEquip(forceQuality, boost) {
   const type = pick(EQUIP_SLOTS);
@@ -986,21 +1124,15 @@ function generateEquip(forceQuality, boost) {
       })();
   const basePower = 5 + state.realmIndex * 8 + state.currentZone * 20;
   const power = Math.floor(basePower * quality.mult * (0.8 + Math.random() * 0.4));
-
   const affixes = [];
   const usedKeys = new Set();
   for (let i = 0; i < quality.statCount; i++) {
-    let affix;
-    let tries = 0;
-    do {
-      affix = pick(AFFIXES);
-      tries++;
-    } while (usedKeys.has(affix.key) && tries < 20);
+    let affix, tries = 0;
+    do { affix = pick(AFFIXES); tries++; } while (usedKeys.has(affix.key) && tries < 20);
     usedKeys.add(affix.key);
     const value = randFloat(affix.min, affix.max) * (1 + state.reincarnBonus);
     affixes.push({ key: affix.key, name: affix.name, value });
   }
-
   return {
     id: Date.now() + Math.random(),
     name: pick(type.names),
@@ -1008,17 +1140,15 @@ function generateEquip(forceQuality, boost) {
     slotLabel: type.label,
     quality: quality.name,
     qualityColor: quality.color,
-    power: power,
-    basePower: power,
+    power, basePower: power,
     level: 0,
     maxLevel: quality.maxLv,
     enhanceCost: quality.enhanceCost,
-    affixes: affixes,
+    affixes,
     gems: [],
     gemSlots: quality.gemSlots,
   };
 }
-
 function rerollRandomAffix() {
   if (state.inventory.length === 0) { log("背包里没有可洗练的装备", "danger"); return; }
   const candidates = state.inventory.filter(i => i.affixes.length > 0);
@@ -1038,7 +1168,6 @@ function rerollRandomAffix() {
 function calcEquipStats() {
   let power = 0, crit = 0, lifesteal = 0, hpBonus = 0, expBonus = 0, goldBonus = 0, dropBonus = 0;
   const equipped = Object.values(state.equipment).filter(Boolean);
-
   equipped.forEach(item => {
     power += safeNum(item.power);
     (item.affixes || []).forEach(a => {
@@ -1052,24 +1181,17 @@ function calcEquipStats() {
       else if (a.key === "power") power += safeNum(item.power) * v;
     });
   });
-
-  // 宝石加成
   const gemBonus = getGemBonus();
-  crit += gemBonus.crit;
-  lifesteal += gemBonus.lifesteal;
-  expBonus += gemBonus.exp;
-  goldBonus += gemBonus.gold;
-  dropBonus += gemBonus.drop;
-
-  // 功法加成
+  crit += gemBonus.crit; lifesteal += gemBonus.lifesteal;
+  expBonus += gemBonus.exp; goldBonus += gemBonus.gold; dropBonus += gemBonus.drop;
   const skillBonus = getSkillBonus();
   power *= (1 + skillBonus.power);
-  hpBonus += skillBonus.hp;
-  crit += skillBonus.crit;
-  lifesteal += skillBonus.lifesteal;
-  expBonus += skillBonus.exp;
-  goldBonus += skillBonus.gold;
-
+  hpBonus += skillBonus.hp; crit += skillBonus.crit;
+  lifesteal += skillBonus.lifesteal; expBonus += skillBonus.exp; goldBonus += skillBonus.gold;
+  const bookBonus = getBookBonus();
+  power *= (1 + bookBonus.power);
+  hpBonus += bookBonus.hp; crit += bookBonus.crit;
+  lifesteal += bookBonus.lifesteal; expBonus += bookBonus.exp; goldBonus += bookBonus.gold;
   const names = equipped.map(i => i.name);
   let setBonus = { active: false, count: 0, name: "" };
   for (const set of SETS) {
@@ -1081,10 +1203,8 @@ function calcEquipStats() {
       if (set.bonus.lifesteal) lifesteal += set.bonus.lifesteal;
     }
   }
-
   return { power, crit, lifesteal, hpBonus, expBonus, goldBonus, dropBonus, setBonus };
 }
-
 function recalcPower() {
   const stats = calcEquipStats();
   const reincMult = 1 + safeNum(state.reincarnBonus);
@@ -1127,7 +1247,6 @@ function enhanceEquip(item) {
   log(`强化成功！【${item.quality}·${item.name}】+${item.level}，战力 ${item.power}`, item.qualityColor);
   return true;
 }
-
 function equipItem(item) {
   const old = state.equipment[item.slot];
   if (old) state.inventory.push(old);
@@ -1138,7 +1257,6 @@ function equipItem(item) {
   updateUI();
   renderInventory();
 }
-
 function unequipItem(slot) {
   const item = state.equipment[slot];
   if (!item) return;
@@ -1149,12 +1267,10 @@ function unequipItem(slot) {
   updateUI();
   renderInventory();
 }
-
 function sellItem(item) {
   const quality = QUALITY.find(q => q.name === item.quality);
   let price = Math.floor(quality.price * (1 + item.level * 0.2));
   (item.affixes || []).forEach(a => { if (a.key === "gold") price = Math.floor(price * (1 + safeNum(a.value))); });
-  // 宝石返还
   (item.gems || []).forEach(g => addGem(g, 1));
   state.gold += price;
   state.inventory = state.inventory.filter(i => i.id !== item.id);
@@ -1162,7 +1278,6 @@ function sellItem(item) {
   updateUI();
   renderInventory();
 }
-
 function sellByQuality(quality) {
   const items = state.inventory.filter(i => i.quality === quality);
   if (items.length === 0) { log(`背包里没有${quality}装备`, "danger"); return; }
@@ -1171,7 +1286,6 @@ function sellByQuality(quality) {
   items.forEach(item => {
     let price = Math.floor(qualityDef.price * (1 + item.level * 0.2));
     (item.affixes || []).forEach(a => { if (a.key === "gold") price = Math.floor(price * (1 + safeNum(a.value))); });
-    // 宝石返还
     (item.gems || []).forEach(g => addGem(g, 1));
     totalGold += price;
   });
@@ -1201,13 +1315,14 @@ function updateUI() {
   document.getElementById("sectQuest").textContent = `讨伐 ${state.sectQuestProgress}/${state.sectQuestTarget}`;
   document.getElementById("breakBtn").disabled = state.exp < realm.need;
   document.getElementById("breakBtn").textContent = state.autoBreak ? "突破境界（自动）" : "突破境界（手动）";
+  document.getElementById("currentSect").textContent = state.sect ? SECTS.find(s => s.key === state.sect).name : "未入门";
 
   if (state.currentMonster && isFinite(state.monsterHp) && isFinite(state.monsterMaxHp)) {
     const bossTag = state.isBoss ? ` <span class="boss-tag">[${state.bossType}]</span>` : "";
     document.getElementById("monsterName").innerHTML = `${state.currentMonster.name} Lv.${state.currentZone + 1}${bossTag}`;
     document.getElementById("monsterHpText").textContent = `${fmt(Math.max(0, state.monsterHp))} / ${fmt(state.monsterMaxHp)}`;
     document.getElementById("monsterHpFill").style.width = Math.max(0, (state.monsterHp / state.monsterMaxHp) * 100) + "%";
-    document.getElementById("monsterState").textContent = state.monsterHp > 0 ? "战斗中" : "已击杀";
+    document.getElementById("monsterState").textContent = state.monsterHp > 0 ? (state.stunTimer > 0 ? "眩晕中" : "战斗中") : "已击杀";
   }
 
   document.getElementById("miniRealm").textContent = realm.name;
@@ -1254,6 +1369,28 @@ function renderInventory() {
     list.appendChild(div);
   }
 
+  // 技能书
+  const knownBooksList = Object.keys(state.knownBooks || {}).filter(k => state.knownBooks[k] > 0);
+  if (knownBooksList.length > 0) {
+    const title = document.createElement("div");
+    title.style.cssText = "color:#888;font-size:11px;margin:6px 0 4px;";
+    title.textContent = "— 已学技能书 —";
+    list.appendChild(title);
+    knownBooksList.forEach(k => {
+      const book = SKILL_BOOKS.find(b => b.key === k);
+      if (!book) return;
+      const div = document.createElement("div");
+      div.className = "item book";
+      div.innerHTML = `
+        <div style="flex:1;">
+          <div class="name" style="color:#ffaa00;">${book.name} Lv.${state.knownBooks[k]}</div>
+          <div class="book-line">${book.desc}</div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
   // 宝石背包
   const gemKeys = Object.keys(state.gems).filter(k => state.gems[k] > 0);
   if (gemKeys.length > 0) {
@@ -1291,7 +1428,7 @@ function renderInventory() {
     sorted.forEach(item => list.appendChild(renderItemRow(item, "bag")));
   }
 
-  if (equipped.length === 0 && state.inventory.length === 0 && gemKeys.length === 0) {
+  if (equipped.length === 0 && state.inventory.length === 0 && gemKeys.length === 0 && knownBooksList.length === 0) {
     list.innerHTML = '<div class="empty">背包空空如也</div>';
   }
 }
@@ -1307,7 +1444,6 @@ function renderItemRow(item, mode) {
   }).join(" · ");
   const affixLine = affixText ? `<div class="stat-line">${affixText}</div>` : "";
 
-  // 宝石孔显示
   const slots = item.gemSlots || 0;
   const gemsArr = item.gems || [];
   let gemLine = "";
@@ -1334,8 +1470,6 @@ function renderItemRow(item, mode) {
       <button class="sell" data-sell="${item.id}">出售</button>
     `;
   }
-
-  // 孔位可以镶嵌宝石
   let socketButton = "";
   if (slots > 0 && gemsArr.length < slots) {
     socketButton = `<button class="gem" data-socket="${item.id}">镶嵌</button>`;
@@ -1379,7 +1513,6 @@ function bindInventoryEvents() {
       }
       return;
     }
-    // 点击宝石图标卸下
     const gemSpan = e.target.closest("[data-unsocket]");
     if (gemSpan) {
       const [idStr, idxStr] = gemSpan.dataset.unsocket.split(":");
@@ -1396,7 +1529,6 @@ function bindInventoryEvents() {
 }
 
 function openSocketPanel(item) {
-  // 列出可用宝石
   const gemKeys = Object.keys(state.gems).filter(k => state.gems[k] > 0);
   if (gemKeys.length === 0) { log("没有可镶嵌的宝石", "danger"); return; }
   const gemList = gemKeys.map(k => {
@@ -1441,7 +1573,6 @@ function renderShop(sub = "normal") {
       });
     });
   } else {
-    // 宝石商店
     GEM_SHOP.forEach((item, index) => {
       const g = item.random ? null : GEMS.find(x => x.key === item.key);
       const div = document.createElement("div");
@@ -1520,8 +1651,8 @@ function spawnMonster() {
   state.monsterHp = state.monsterMaxHp;
   state.isBoss = false;
   state.bossType = null;
+  state.stunTimer = 0;
 }
-
 function spawnBoss(type) {
   const boss = BOSSES[type];
   const zoneMonsters = MONSTERS[state.currentZone] || MONSTERS[0];
@@ -1535,11 +1666,13 @@ function spawnBoss(type) {
     stone: (base.stone + rand(1, 3)) * boss.stoneMult,
     dropRate: boss.dropRate,
     qualityBoost: boss.qualityBoost,
+    bookDropRate: boss.bookDropRate,
   };
   state.monsterMaxHp = Math.floor(base.hp * boss.hpMult * scale);
   state.monsterHp = state.monsterMaxHp;
   state.isBoss = true;
   state.bossType = type === "zone" ? "区域BOSS" : "世界BOSS";
+  state.stunTimer = 0;
   log(`⚔ ${state.bossType}【${state.currentMonster.name}】出现！`, "danger");
 }
 
@@ -1550,8 +1683,17 @@ function fightTick() {
   if (state.stamina < 5) { state.stamina = Math.min(state.maxStamina, state.stamina + 2); return; }
   state.stamina -= 5;
 
+  // 冷却
+  if (state.skillCooldown > 0) state.skillCooldown--;
+  if (state.buffAtk > 0) state.buffAtk--;
+  if (state.buffDef > 0) state.buffDef--;
+  if (state.stunTimer > 0) state.stunTimer--;
+  if (state.skillCooldown >= 0) renderSkillBar();
+
   const reincMult = 1 + safeNum(state.reincarnBonus);
-  let playerDamage = state.power * reincMult + rand(0, Math.floor(state.power * 0.3 * reincMult));
+  let atkMult = 1;
+  if (state.buffAtk > 0) atkMult += state.buffAtkValue;
+  let playerDamage = state.power * reincMult * atkMult + rand(0, Math.floor(state.power * 0.3 * reincMult));
   let isCrit = Math.random() < state.critRate;
   if (isCrit) playerDamage = Math.floor(playerDamage * 2);
 
@@ -1571,7 +1713,6 @@ function fightTick() {
     state.stone += m.stone;
     state.kills++;
     state.sectQuestProgress++;
-    // 功法点数
     state.skillPoints = (state.skillPoints || 0) + (state.isBoss ? 3 : 1);
 
     const critText = isCrit ? " [暴击]" : "";
@@ -1583,8 +1724,24 @@ function fightTick() {
       state.inventory.push(eq);
       log(`✦ 掉落【${eq.quality}·${eq.name}】，战力 +${eq.power}`, eq.qualityColor);
     }
-    // 掉落宝石（10% 概率）
     if (Math.random() < 0.10) dropGem();
+
+    // Boss 掉落技能书
+    if (state.isBoss && m.bookDropRate) {
+      if (Math.random() < m.bookDropRate) {
+        const availableBooks = getAvailableBooks();
+        if (availableBooks.length > 0) {
+          const book = pick(availableBooks);
+          if (!state.knownBooks[book.key]) state.knownBooks[book.key] = 0;
+          if (state.knownBooks[book.key] < 5) {
+            state.knownBooks[book.key]++;
+            log(`📖 掉落技能书【${book.name}】，学习成功 Lv.${state.knownBooks[book.key]}`, "book");
+          } else {
+            log(`📖 掉落技能书【${book.name}】，但已满级`, "book");
+          }
+        }
+      }
+    }
 
     if (state.sectQuestProgress >= state.sectQuestTarget) {
       state.sectPoint += 10;
@@ -1604,12 +1761,16 @@ function fightTick() {
     }
     spawnMonster();
   } else {
-    const monsterDamage = Math.floor(state.currentMonster.atk * (0.7 + Math.random() * 0.6));
-    state.hp -= monsterDamage;
-    if (state.hp <= 0) {
-      state.hp = state.maxHp * 0.5;
-      state.exp = Math.max(0, state.exp - Math.floor(REALMS[state.realmIndex].need * 0.05));
-      log(`你被【${state.currentMonster.name}】击倒，修为损失，气血恢复一半`, "danger");
+    // 怪物攻击（眩晕时不攻击）
+    if (state.stunTimer <= 0) {
+      let monsterDamage = Math.floor(state.currentMonster.atk * (0.7 + Math.random() * 0.6));
+      if (state.buffDef > 0) monsterDamage = Math.floor(monsterDamage * 0.5);
+      state.hp -= monsterDamage;
+      if (state.hp <= 0) {
+        state.hp = state.maxHp * 0.5;
+        state.exp = Math.max(0, state.exp - Math.floor(REALMS[state.realmIndex].need * 0.05));
+        log(`你被【${state.currentMonster.name}】击倒，修为损失，气血恢复一半`, "danger");
+      }
     }
   }
 
@@ -1634,37 +1795,75 @@ function doBreak() {
   updateUI();
 }
 
+// ==================== 宗门技能阁 ====================
+function renderSkillShop() {
+  const box = document.getElementById("skillShop");
+  if (!box) return;
+  box.innerHTML = "";
+  const books = getAvailableBooks();
+  if (books.length === 0) {
+    box.innerHTML = '<div class="empty">当前境界暂无可兑换的技能书</div>';
+    return;
+  }
+  books.forEach(book => {
+    const owned = state.knownBooks[book.key] || 0;
+    const div = document.createElement("div");
+    div.className = "shop-item";
+    const price = book.price;
+    div.innerHTML = `
+      <div>
+        <div class="name" style="color:#ffaa00;font-size:12px;">${book.name} ${owned > 0 ? `(已学 Lv.${owned})` : ""}</div>
+        <div class="attr" style="color:#888;font-size:10px;">${book.desc}</div>
+      </div>
+      <button data-buy-book="${book.key}" ${state.sectPoint < price || owned >= 5 ? "disabled" : ""}>
+        ${owned >= 5 ? "已满级" : `${price} 贡献`}
+      </button>
+    `;
+    box.appendChild(div);
+  });
+  box.querySelectorAll("[data-buy-book]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.buyBook;
+      const book = SKILL_BOOKS.find(b => b.key === key);
+      if (!book) return;
+      if (state.sectPoint < book.price) { log("宗门贡献不足", "danger"); return; }
+      const owned = state.knownBooks[book.key] || 0;
+      if (owned >= 5) { log("已满级", "danger"); return; }
+      state.sectPoint -= book.price;
+      state.knownBooks[book.key] = owned + 1;
+      log(`兑换技能书【${book.name}】成功，Lv.${state.knownBooks[book.key]}`, "book");
+      recalcPower();
+      updateUI();
+      renderSkillShop();
+    });
+  });
+}
+
 // ==================== 转生 ====================
 function doReincarn() {
   const needRealm = Math.min(REALMS.length - 1, 9 + state.reincarnCount * 9);
   if (state.realmIndex < needRealm) { log("境界不足，无法转生", "danger"); return; }
   state.reincarnCount++;
   state.reincarnBonus = state.reincarnCount * 0.2;
-  state.realmIndex = 0;
-  state.exp = 0;
-  state.hp = 100;
-  state.maxHp = 100;
-  state.stamina = 100;
-  state.maxStamina = 100;
+  state.realmIndex = 0; state.exp = 0;
+  state.hp = 100; state.maxHp = 100;
+  state.stamina = 100; state.maxStamina = 100;
   state.basePower = 10;
-  state.totalEquipBonus = 0;
-  state.power = 10;
-  state.critRate = 0.05;
-  state.lifesteal = 0;
-  state.gold = 0;
-  state.stone = 0;
-  state.kills = 0;
+  state.totalEquipBonus = 0; state.power = 10;
+  state.critRate = 0.05; state.lifesteal = 0;
+  state.gold = 0; state.stone = 0; state.kills = 0;
   state.inventory = [];
   state.equipment = { weapon: null, armor: null, accessory: null };
-  state.currentZone = 0;
-  state.currentMonster = null;
-  state.isBoss = false;
-  state.sectQuestProgress = 0;
-  state.sectQuestTarget = 5;
+  state.currentZone = 0; state.currentMonster = null; state.isBoss = false;
+  state.sectQuestProgress = 0; state.sectQuestTarget = 5;
+  state.skillCooldown = 0; state.buffAtk = 0; state.buffDef = 0; state.stunTimer = 0;
   recalcPower();
   spawnMonster();
   renderZones();
   renderInventory();
+  renderSkillBar();
+  renderSectSelect();
+  renderSkillShop();
   updateUI();
   log(`★★★ 转生成功！当前转生 ${state.reincarnCount} 次，永久加成 +${(state.reincarnBonus*100).toFixed(0)}%`, "myth");
 }
@@ -1693,7 +1892,6 @@ function saveGame() {
   localStorage.setItem("xiuxian_arpg_time", Date.now());
   scheduleCloudSave();
 }
-
 function loadGame() {
   const saved = localStorage.getItem("xiuxian_arpg_save");
   if (saved) {
@@ -1719,11 +1917,16 @@ function loadGame() {
       state.gems = state.gems || {};
       state.skills = state.skills || {};
       state.sign = state.sign || { lastDate: "", streak: 0, days: [] };
+      state.knownBooks = state.knownBooks || {};
+      state.sect = state.sect || null;
+      state.skillCooldown = safeNum(state.skillCooldown);
+      state.buffAtk = safeNum(state.buffAtk);
+      state.buffDef = safeNum(state.buffDef);
+      state.stunTimer = safeNum(state.stunTimer);
       recalcPower();
     } catch (e) { console.warn("存档读取失败"); }
   }
 }
-
 function offlineEarnings() {
   const last = localStorage.getItem("xiuxian_arpg_time");
   const now = Date.now();
@@ -1746,7 +1949,6 @@ function offlineEarnings() {
   }
   localStorage.setItem("xiuxian_arpg_time", now);
 }
-
 function resetGame() {
   if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
   localStorage.removeItem("xiuxian_arpg_save");
@@ -1765,13 +1967,11 @@ document.getElementById("breakBtn").addEventListener("click", () => {
   if (state.autoBreak) doBreak();
   updateUI();
 });
-
 document.getElementById("toggleBtn").addEventListener("click", () => {
   document.getElementById("app").classList.toggle("mini");
   document.getElementById("toggleBtn").textContent =
     document.getElementById("app").classList.contains("mini") ? "展开模式" : "迷你模式";
 });
-
 document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -1781,9 +1981,9 @@ document.querySelectorAll(".tab").forEach(tab => {
     if (tab.dataset.tab === "inventory") renderInventory();
     if (tab.dataset.tab === "shop") renderShop(currentShopTab);
     if (tab.dataset.tab === "skill") renderSkills();
+    if (tab.dataset.tab === "sect") { renderSectSelect(); renderSkillShop(); }
   });
 });
-
 let currentShopTab = "normal";
 document.querySelectorAll(".sub-tab").forEach(tab => {
   tab.addEventListener("click", () => {
@@ -1793,24 +1993,19 @@ document.querySelectorAll(".sub-tab").forEach(tab => {
     renderShop(currentShopTab);
   });
 });
-
 document.getElementById("signBtn").addEventListener("click", doSign);
-
 document.getElementById("sectTaskBtn").addEventListener("click", () => {
   if (state.sectPoint >= 20) { state.sectPoint -= 20; state.sectQuestTarget += 5; log("接取高级宗门任务，目标提升", "rare"); }
   else log("宗门贡献不足（需要 20）", "danger");
   updateUI();
 });
-
 document.getElementById("sectUpgradeBtn").addEventListener("click", () => {
   if (state.sectPoint >= 30) { state.sectPoint -= 30; state.basePower += 15; recalcPower(); log("消耗 30 宗门贡献，基础战力 +15", "epic"); }
   else log("宗门贡献不足（需要 30）", "danger");
   updateUI();
 });
-
 document.getElementById("bossBtn1").addEventListener("click", () => spawnBoss("zone"));
 document.getElementById("bossBtn2").addEventListener("click", () => spawnBoss("world"));
-
 document.getElementById("reincarnBtn").addEventListener("click", doReincarn);
 document.getElementById("resetBtn").addEventListener("click", resetGame);
 
@@ -1819,13 +2014,16 @@ async function init() {
   loadGame();
   bindInventoryEvents();
   log("你于洞府中睁开双眼，开始了偷偷摸摸的修仙之路……");
-  log("提示：击杀怪物可获得功法点，去【功法】面板学技能；装备孔位可镶嵌宝石。", "rare");
+  log("提示：去【宗门】选流派，去【功法】学技能，Boss 可掉技能书。", "rare");
   spawnMonster();
   renderZones();
   renderInventory();
   renderShop();
   renderSkills();
   renderSign();
+  renderSectSelect();
+  renderSkillShop();
+  renderSkillBar();
   updateUI();
 
   updateSyncStatus("云端存档：连接中…", "");
@@ -1840,6 +2038,9 @@ async function init() {
     renderZones();
     renderSkills();
     renderSign();
+    renderSectSelect();
+    renderSkillShop();
+    renderSkillBar();
   } else {
     updateSyncStatus("云端存档：首次上传", "");
     await cloudSave();
@@ -1853,7 +2054,6 @@ async function init() {
   setInterval(() => { if (cloudReady) saveGame(); }, 10000);
   window.addEventListener("beforeunload", () => { if (cloudReady) saveGame(); });
 }
-
 init();
 </script>
 </body>
