@@ -1318,8 +1318,10 @@ function updateUI() {
   document.getElementById("sectQuest").textContent = `讨伐 ${state.sectQuestProgress}/${state.sectQuestTarget}`;
   document.getElementById("skillPoints").textContent = fmt(state.skillPoints);
   document.getElementById("talentPoints").textContent = fmt(state.talentPoints);
-  document.getElementById("talentPoints2").textContent = fmt(state.talentPoints);
-  document.getElementById("miniTalent").textContent = fmt(state.talentPoints);
+  const talentPoints2El = document.getElementById("talentPoints2");
+  if (talentPoints2El) talentPoints2El.textContent = fmt(state.talentPoints);
+  const miniTalentEl = document.getElementById("miniTalent");
+  if (miniTalentEl) miniTalentEl.textContent = fmt(state.talentPoints);
   document.getElementById("breakBtn").disabled = state.exp < realm.need;
   document.getElementById("breakBtn").textContent = state.autoBreak ? "突破境界（自动）" : "突破境界（手动）";
   document.getElementById("currentSect").textContent = state.sect ? SECTS.find(s => s.key === state.sect).name : "未入门";
