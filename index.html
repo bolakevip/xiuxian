@@ -1973,30 +1973,57 @@ function offlineEarnings() {
 }
 
 // ==================== 清档（修复：不再被云档覆盖）====================
-async function resetGame() {
+function resetGame() {
   if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
 
-  // 1. 先清本地
+  // 1. 清本地
   localStorage.removeItem("xiuxian_arpg_save");
   localStorage.removeItem("xiuxian_arpg_time");
   sessionStorage.setItem("skipCloudLoad", "1");
 
-  // 2. 清云端，等请求真正完成
-  cloudReady = true;
-  try {
-    const res = await fetch("/api/sync", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data: null }),
-    });
-    const result = await res.json();
-    console.log("清档结果:", result);
-  } catch (e) {
-    console.warn("清档请求失败", e);
-  }
+  // 2. 构造一个全新空档，直接覆盖云端
+  const emptyState = {
+    realmIndex: 0, exp: 0, hp: 100, maxHp: 100,
+    stamina: 100, maxStamina: 100,
+    basePower: 10, totalEquipBonus: 0, power: 10,
+    critRate: 0.05, lifesteal: 0,
+    gold: 0, stone: 0, kills: 0,
+    sectPoint: 0, sectQuestProgress: 0, sectQuestTarget: 5,
+    autoBreak: true,
+    inventory: [],
+    equipment: { weapon: null, armor: null, accessory: null },
+    currentZone: 0,
+    reincarnCount: 0, reincarnBonus: 0,
+    setBonus: { active: false, count: 0, name: "" },
+    gems: {},
+    sign: { lastDate: "", streak: 0, days: [] },
+    skills: {},
+    skillPoints: 0,
+    sect: null,
+    skillCooldown: 0, buffAtk: 0, buffAtkValue: 0, buffDef: 0, stunTimer: 0,
+    knownBooks: {},
+    pets: [],
+    activePet: null,
+    talentPoints: 0,
+    talents: {},
+  };
 
-  // 3. 等 1.5 秒让 KV 生效，再刷新
-  setTimeout(() => location.reload(), 1500);
+  // 3. 用空档覆盖本地和云端
+  state = emptyState;
+  cloudReady = true;
+
+  fetch("/api/sync", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data: emptyState }),
+  })
+  .then(() => {
+    // 等云端覆盖完成，再刷新
+    setTimeout(() => location.reload(), 800);
+  })
+  .catch(() => {
+    setTimeout(() => location.reload(), 800);
+  });
 }
 
 // ==================== 事件 ====================
