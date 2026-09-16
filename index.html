@@ -1973,7 +1973,7 @@ function offlineEarnings() {
 }
 
 // ==================== 清档（修复：不再被云档覆盖）====================
-function resetGame() {
+async function resetGame() {
   if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
 
   // 1. 先清本地
@@ -1981,17 +1981,22 @@ function resetGame() {
   localStorage.removeItem("xiuxian_arpg_time");
   sessionStorage.setItem("skipCloudLoad", "1");
 
-  // 2. 清云端，不管成功失败都刷新
+  // 2. 清云端，等请求真正完成
   cloudReady = true;
-  fetch("/api/sync", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: null }),
-  })
-  .catch(() => {})
-  .finally(() => {
-    setTimeout(() => location.reload(), 500);
-  });
+  try {
+    const res = await fetch("/api/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: null }),
+    });
+    const result = await res.json();
+    console.log("清档结果:", result);
+  } catch (e) {
+    console.warn("清档请求失败", e);
+  }
+
+  // 3. 等 1.5 秒让 KV 生效，再刷新
+  setTimeout(() => location.reload(), 1500);
 }
 
 // ==================== 事件 ====================
