@@ -1,21 +1,55 @@
-function resetGame() {
-  if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
+// Cloudflare Pages Functions - 云端存档同步
+// 路径：functions/api/sync.js
+// 对应前端请求：/api/sync
 
-  // 1. 先清本地
-  localStorage.removeItem("xiuxian_arpg_save");
-  localStorage.removeItem("xiuxian_arpg_time");
-  sessionStorage.setItem("skipCloudLoad", "1");
+const KV_KEY = "default-save";
 
-  // 2. 清云端，不管成功失败都刷新
-  cloudReady = true;
-  fetch("/api/sync", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: null }),
-  })
-  .catch(() => {})
-  .finally(() => {
-    // 等 500ms 让 KV 写入生效，再刷新
-    setTimeout(() => location.reload(), 500);
-  });
+// GET：读取存档
+export async function onRequestGet(context) {
+  const { env } = context;
+  try {
+    const data = await env.XIUXIAN_KV.get(KV_KEY, { type: "json" });
+    return new Response(JSON.stringify({ state: data }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ state: null }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+
+// POST：写入存档，或删除存档（data 为 null 时）
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  try {
+    const body = await request.json();
+
+    // data === null → 删除存档
+    if (body && body.data === null) {
+      await env.XIUXIAN_KV.delete(KV_KEY);
+      return new Response(JSON.stringify({ ok: true, deleted: true }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // 没有 data 字段 → 返回 400
+    if (!body || !body.data) {
+      return new Response(JSON.stringify({ error: "Missing data" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // 正常写入
+    await env.XIUXIAN_KV.put(KV_KEY, JSON.stringify(body.data));
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
