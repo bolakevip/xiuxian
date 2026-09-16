@@ -658,7 +658,7 @@ function updateSyncStatus(text, cls = "") {
 function scheduleCloudSave() {
   if (!cloudReady) return;
   if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
-  cloudSyncTimer = setTimeout(cloudSave, 5000);
+  cloudSyncTimer = setTimeout(cloudSave, 30000);
 }
 
 // ==================== 宝石 ====================
@@ -2141,9 +2141,8 @@ async function init() {
 
   setInterval(fightTick, 1000);
   setInterval(regenLoop, 2000);
-  setInterval(() => { if (cloudReady) saveGame(); }, 10000);
-  window.addEventListener("beforeunload", () => { if (cloudReady) saveGame(); });
-}
+  setInterval(() => { if (cloudReady) saveGame(); }, 60000);
+  }
 init();
 </script>
 </body>
