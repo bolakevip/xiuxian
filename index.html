@@ -449,7 +449,7 @@ const state = {
   talents: {},
 };
 
-// ==================== 新境界体系（前期需求大幅加大）====================
+// ==================== 新境界体系 ====================
 const BIG_REALMS = [
   { name: "炼气期", baseNeed: 200,           basePower: 5 },
   { name: "筑基期", baseNeed: 8000,          basePower: 300 },
@@ -487,7 +487,6 @@ const ZONES = [
   { name: "鸿蒙本源", tier: 7, unlock: 63, desc: "鸿蒙道祖出没" },
 ];
 
-// 装备掉率：低等级高，高等级低
 const MONSTERS = {
   0: [
     { name: "野兔",   hp: 30,   atk: 4,   exp: 1,   gold: 1,   stone: 0, dropRate: 0.030 },
@@ -863,7 +862,6 @@ function getPetBonus() {
   else if (t.attr === "gold") bonus.gold += val;
   return bonus;
 }
-
 function generatePet(forceQuality) {
   const t = pick(PET_TYPES);
   const quality = forceQuality
@@ -880,43 +878,33 @@ function generatePet(forceQuality) {
     typeKey: t.key,
     name: quality.name + "·" + t.name,
     quality: quality.name,
-    qualityColor: quality.color || (quality.name === "灵兽" ? "rare" : quality.name === "仙兽" ? "legend" : quality.name === "神兽" ? "myth" : ""),
     level: 1,
     attr: t.attr,
     value: t.value,
     icon: t.icon,
   };
 }
-
 function addPet(pet) {
   state.pets.push(pet);
   log(`✦ 获得灵兽【${pet.name}】`, "pet");
 }
-
 function dropPet() {
   const pet = generatePet();
   addPet(pet);
 }
-
 function setActivePet(id) {
   state.activePet = id;
-  recalcPower();
-  renderPets();
-  updateUI();
+  recalcPower(); renderPets(); updateUI();
   log("已切换出战灵兽", "pet");
 }
-
 function releasePet(id) {
   const pet = state.pets.find(p => p.id === id);
   if (!pet) return;
   if (state.activePet === id) state.activePet = null;
   state.pets = state.pets.filter(p => p.id !== id);
-  recalcPower();
-  renderPets();
-  updateUI();
+  recalcPower(); renderPets(); updateUI();
   log(`放生灵兽【${pet.name}】`, "pet");
 }
-
 function upgradePet(id) {
   const pet = state.pets.find(p => p.id === id);
   if (!pet) return;
@@ -924,20 +912,15 @@ function upgradePet(id) {
   if (state.gold < cost) { log(`灵石不足（需要 ${cost}）`, "danger"); return; }
   state.gold -= cost;
   pet.level++;
-  recalcPower();
-  renderPets();
-  updateUI();
+  recalcPower(); renderPets(); updateUI();
   log(`【${pet.name}】升级到 Lv.${pet.level}`, "pet");
 }
-
 function renderPets() {
   const list = document.getElementById("petList");
   list.innerHTML = "";
   document.getElementById("petCount").textContent = state.pets.length;
   const active = state.pets.find(p => p.id === state.activePet);
   document.getElementById("petActiveName").textContent = active ? active.name : "无";
-  document.getElementById("petActiveName").style.color = active ? (PET_QUALITY.find(q => q.name === active.quality)?.color || "#a0ffaa") : "#888";
-
   if (state.pets.length === 0) {
     list.innerHTML = '<div class="empty">还没有灵兽，击杀怪物或去灵兽商店获取</div>';
     return;
@@ -990,7 +973,6 @@ function getTalentBonus() {
   });
   return bonus;
 }
-
 function learnTalent(key) {
   let node = null;
   for (const branch of TALENTS) {
@@ -1004,11 +986,8 @@ function learnTalent(key) {
   state.talentPoints--;
   state.talents[key] = cur + 1;
   log(`学习天赋【${node.name}】 Lv.${state.talents[key]}`, "talent");
-  recalcPower();
-  renderTalents();
-  updateUI();
+  recalcPower(); renderTalents(); updateUI();
 }
-
 function renderTalents() {
   const tree = document.getElementById("talentTree");
   if (!tree) return;
@@ -1746,7 +1725,7 @@ function doBreak() {
   renderZones(); updateUI();
 }
 
-// ==================== 宗门技能阁 ====================
+// ==================== 宗门技能阁（修复：可升级到 5 级）====================
 function renderSkillShop() {
   const box = document.getElementById("skillShop");
   if (!box) return;
@@ -1760,13 +1739,15 @@ function renderSkillShop() {
     const owned = state.knownBooks[book.key] || 0;
     const div = document.createElement("div");
     div.className = "shop-item";
+    const isMax = owned >= 5;
+    const canBuy = state.sectPoint >= book.price && !isMax;
     div.innerHTML = `
       <div>
         <div class="name" style="color:#ffaa00;font-size:12px;">${book.name} ${owned > 0 ? `(已学 Lv.${owned})` : ""}</div>
         <div class="attr" style="color:#888;font-size:10px;">${book.desc}</div>
       </div>
-      <button data-buy-book="${book.key}" ${state.sectPoint < book.price || owned >= 5 ? "disabled" : ""}>
-        ${owned >= 5 ? "已满级" : `${book.price} 贡献`}
+      <button data-buy-book="${book.key}" ${canBuy ? "" : "disabled"}>
+        ${isMax ? "已满级" : `${book.price} 贡献`}
       </button>
     `;
     box.appendChild(div);
@@ -1952,10 +1933,10 @@ function loadGame() {
       state.currentZone = Math.max(0, Math.min(ZONES.length - 1, safeNum(state.currentZone)));
       state.inventory = Array.isArray(state.inventory) ? state.inventory : [];
       state.equipment = state.equipment || { weapon: null, armor: null, accessory: null };
-      state.gems = state.gems || {};
-      state.skills = state.skills || {};
+      state.gems = state.gems && typeof state.gems === "object" ? state.gems : {};
+      state.skills = state.skills && typeof state.skills === "object" ? state.skills : {};
       state.sign = state.sign || { lastDate: "", streak: 0, days: [] };
-      state.knownBooks = state.knownBooks || {};
+      state.knownBooks = state.knownBooks && typeof state.knownBooks === "object" ? state.knownBooks : {};
       state.sect = state.sect || null;
       state.skillCooldown = safeNum(state.skillCooldown);
       state.buffAtk = safeNum(state.buffAtk);
@@ -1963,7 +1944,7 @@ function loadGame() {
       state.stunTimer = safeNum(state.stunTimer);
       state.pets = Array.isArray(state.pets) ? state.pets : [];
       state.activePet = state.activePet || null;
-      state.talents = state.talents || {};
+      state.talents = state.talents && typeof state.talents === "object" ? state.talents : {};
       recalcPower();
     } catch (e) { console.warn("存档读取失败"); }
   }
@@ -1990,16 +1971,26 @@ function offlineEarnings() {
   }
   localStorage.setItem("xiuxian_arpg_time", now);
 }
+
+// ==================== 清档（修复：不再被云档覆盖）====================
 function resetGame() {
   if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
+  // 先清本地
   localStorage.removeItem("xiuxian_arpg_save");
   localStorage.removeItem("xiuxian_arpg_time");
   cloudReady = true;
+  // 标记跳过下次云端加载
+  sessionStorage.setItem("skipCloudLoad", "1");
+  // 等云端清空完成后再刷新
   fetch("/api/sync", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ data: null }),
-  }).finally(() => location.reload());
+  }).then(() => {
+    location.reload();
+  }).catch(() => {
+    location.reload();
+  });
 }
 
 // ==================== 事件 ====================
@@ -2052,7 +2043,7 @@ document.getElementById("bossBtn2").addEventListener("click", () => spawnBoss("w
 document.getElementById("reincarnBtn").addEventListener("click", doReincarn);
 document.getElementById("resetBtn").addEventListener("click", resetGame);
 
-// ==================== 启动 ====================
+// ==================== 启动（修复：清档后跳过云端加载）====================
 async function init() {
   loadGame();
   bindInventoryEvents();
@@ -2062,22 +2053,30 @@ async function init() {
   renderSign(); renderSectSelect(); renderSkillShop(); renderSkillBar();
   renderPets(); renderTalents(); updateUI();
 
-  updateSyncStatus("云端存档：连接中…", "");
-  const hasCloud = await cloudLoad();
-  if (hasCloud) {
-    log("已从云端载入存档", "gold");
-    if (!state.currentMonster || !isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) {
-      spawnMonster();
-    }
-    updateUI(); renderInventory(); renderZones(); renderSkills(); renderSign();
-    renderSectSelect(); renderSkillShop(); renderSkillBar(); renderPets(); renderTalents();
-  } else {
-    updateSyncStatus("云端存档：首次上传", "");
+  // 如果是清档后刷新，跳过云端加载
+  if (sessionStorage.getItem("skipCloudLoad") === "1") {
+    sessionStorage.removeItem("skipCloudLoad");
+    updateSyncStatus("云端存档：已清空", "");
+    cloudReady = true;
     await cloudSave();
+    updateSyncStatus("云端存档：已同步", "ok");
+  } else {
+    updateSyncStatus("云端存档：连接中…", "");
+    const hasCloud = await cloudLoad();
+    if (hasCloud) {
+      log("已从云端载入存档", "gold");
+      if (!state.currentMonster || !isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) {
+        spawnMonster();
+      }
+      updateUI(); renderInventory(); renderZones(); renderSkills(); renderSign();
+      renderSectSelect(); renderSkillShop(); renderSkillBar(); renderPets(); renderTalents();
+    } else {
+      updateSyncStatus("云端存档：首次上传", "");
+      await cloudSave();
+    }
+    cloudReady = true;
+    updateSyncStatus("云端存档：已同步", "ok");
   }
-
-  cloudReady = true;
-  updateSyncStatus("云端存档：已同步", "ok");
 
   setInterval(fightTick, 1000);
   setInterval(regenLoop, 2000);
