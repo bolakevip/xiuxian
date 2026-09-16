@@ -1785,7 +1785,7 @@ function fightTick() {
     }
 
     if (state.sectQuestProgress >= state.sectQuestTarget) {
-      const reward = 5 + Math.floor(state.sectQuestTarget / 5);
+      const reward = Math.floor(5 * Math.pow(1.3, state.sectQuestTarget / 5)) + state.sectQuestTarget;
       state.sectPoint += reward;
       state.sectQuestProgress = 0;
       state.sectQuestTarget = Math.min(50, state.sectQuestTarget + 5);
