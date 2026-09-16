@@ -139,6 +139,7 @@
   .sync-status { font-size: 11px; text-align: center; margin-top: 4px; color: #888; }
   .sync-status.ok { color: #4ec9b0; }
   .sync-status.err { color: #f14c4c; }
+  .sync-status.local { color: #dcdcaa; }
   .sign-bar { background: #1a1a22; border: 1px solid #3a3a48; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
   .sign-bar h3 { color: #ffd700; font-size: 12px; margin-bottom: 6px; }
   .sign-bar p { color: #888; font-size: 11px; margin-bottom: 8px; }
@@ -200,6 +201,17 @@
   .talent-branch .node:hover:not(.locked) { border-color: #ff8cff; }
   .talent-branch .node.maxed { background: #2a1a2a; border-color: #7a3d9c; color: #c586c0; }
   .talent-branch .node.locked { opacity: 0.4; cursor: not-allowed; }
+  .backup-bar {
+    background: #1a1a22; border: 1px solid #3a3a48; border-radius: 8px;
+    padding: 10px; margin-top: 10px;
+  }
+  .backup-bar h3 { color: #6affd8; font-size: 12px; margin-bottom: 6px; }
+  .backup-bar p { color: #888; font-size: 11px; margin-bottom: 8px; }
+  .backup-bar textarea {
+    width: 100%; height: 60px; background: #0e0e12; border: 1px solid #2a2a35;
+    border-radius: 4px; color: #ccc; font-size: 10px; padding: 4px; margin-top: 4px;
+    font-family: monospace; resize: vertical;
+  }
 </style>
 </head>
 <body>
@@ -208,13 +220,12 @@
 
   <div class="mini-info">
     <div class="row"><span>境界</span><span id="miniRealm">炼气一层</span></div>
-    <div class="row"><span>修为</span><span id="miniExp">0/10</span></div>
+    <div class="row"><span>修为</span><span id="miniExp">0/200</span></div>
     <div class="row"><span>气血</span><span id="miniHp">100/100</span></div>
     <div class="row"><span>战力</span><span id="miniPower">10</span></div>
     <div class="row"><span>灵石</span><span id="miniGold">0</span></div>
     <div class="row"><span>强化石</span><span id="miniStone">0</span></div>
     <div class="row"><span>转生</span><span id="miniReincarn">0</span></div>
-    <div class="row"><span>天赋点</span><span id="miniTalent">0</span></div>
   </div>
 
   <div class="tabs">
@@ -236,7 +247,7 @@
     </div>
 
     <div class="row"><span>境界</span><span id="realm">炼气一层</span></div>
-    <div class="row"><span>修为</span><span id="expText">0 / 10</span></div>
+    <div class="row"><span>修为</span><span id="expText">0 / 200</span></div>
     <div class="bar-bg"><div class="bar-fill" id="expFill"></div></div>
     <div class="row"><span>气血</span><span id="hpText">100 / 100</span></div>
     <div class="bar-bg"><div class="bar-fill" id="hpFill"></div></div>
@@ -329,16 +340,24 @@
       <div class="row"><span>转生天赋树</span><span></span></div>
       <div class="talent-tree" id="talentTree"></div>
     </div>
+    <div class="backup-bar">
+      <h3>💾 存档备份</h3>
+      <p>导出存档码，可复制到另一台设备导入。也可以作为备份。</p>
+      <button class="btn gold" id="exportBtn">导出存档码</button>
+      <textarea id="exportArea" placeholder="存档码会显示在这里"></textarea>
+      <button class="btn" id="importBtn">从下方文本框导入</button>
+      <textarea id="importArea" placeholder="粘贴存档码到这里"></textarea>
+    </div>
   </div>
 
   <div id="log"></div>
-  <div class="sync-status" id="syncStatus">云端存档：初始化中…</div>
+  <div class="sync-status" id="syncStatus">本地存档：已保存</div>
   <button class="btn" id="breakBtn" disabled>突破境界</button>
 </div>
 <button class="toggle" id="toggleBtn">迷你模式</button>
 
 <script>
-// ==================== 流派定义 ====================
+ // ==================== 流派定义 ====================
 const SECTS = [
   { key: "jian", name: "剑修", desc: "高暴击、高单体爆发。技能：万剑归宗（5倍伤害）", skill: "万剑归宗", cd: 30 },
   { key: "fa",   name: "法修", desc: "高修为、范围伤害。技能：天雷咒（3倍伤害+眩晕）", skill: "天雷咒", cd: 30 },
@@ -392,7 +411,6 @@ const PET_QUALITY = [
   { name: "仙兽", color: "#dcdcaa", mult: 3.5, price: 2000 },
   { name: "神兽", color: "#ff6b6b", mult: 7.0, price: 8000 },
 ];
-
 const PET_TYPES = [
   { key: "wolf",   name: "灵狼",   attr: "atk",       value: 0.06, icon: "🐺" },
   { key: "fox",    name: "灵狐",   attr: "crit",      value: 0.03, icon: "🦊" },
@@ -405,19 +423,19 @@ const PET_TYPES = [
 // ==================== 转生天赋树 ====================
 const TALENTS = [
   { branch: "剑道", color: "#ff6b6b", nodes: [
-    { key: "t_jian_1", name: "剑心",    maxLv: 5, effect: { power: 0.08 }, desc: "战力 +8%/级" },
-    { key: "t_jian_2", name: "剑意",    maxLv: 5, effect: { crit: 0.03 },  desc: "暴击 +3%/级" },
-    { key: "t_jian_3", name: "剑魂",    maxLv: 3, effect: { power: 0.20 }, desc: "战力 +20%/级" },
+    { key: "t_jian_1", name: "剑心", maxLv: 5, effect: { power: 0.08 }, desc: "战力 +8%/级" },
+    { key: "t_jian_2", name: "剑意", maxLv: 5, effect: { crit: 0.03 },  desc: "暴击 +3%/级" },
+    { key: "t_jian_3", name: "剑魂", maxLv: 3, effect: { power: 0.20 }, desc: "战力 +20%/级" },
   ]},
   { branch: "体道", color: "#6affd8", nodes: [
-    { key: "t_ti_1", name: "铁骨",    maxLv: 5, effect: { hp: 0.15 },     desc: "气血 +15%/级" },
-    { key: "t_ti_2", name: "金身",    maxLv: 5, effect: { hp: 0.20 },     desc: "气血 +20%/级" },
-    { key: "t_ti_3", name: "不灭",    maxLv: 3, effect: { hp: 0.30 },     desc: "气血 +30%/级" },
+    { key: "t_ti_1", name: "铁骨", maxLv: 5, effect: { hp: 0.15 }, desc: "气血 +15%/级" },
+    { key: "t_ti_2", name: "金身", maxLv: 5, effect: { hp: 0.20 }, desc: "气血 +20%/级" },
+    { key: "t_ti_3", name: "不灭", maxLv: 3, effect: { hp: 0.30 }, desc: "气血 +30%/级" },
   ]},
   { branch: "魔道", color: "#c586c0", nodes: [
-    { key: "t_mo_1", name: "血煞",    maxLv: 5, effect: { lifesteal: 0.02 }, desc: "吸血 +2%/级" },
-    { key: "t_mo_2", name: "贪狼",    maxLv: 5, effect: { gold: 0.10 },     desc: "灵石 +10%/级" },
-    { key: "t_mo_3", name: "噬魂",    maxLv: 3, effect: { drop: 0.05 },     desc: "掉宝 +5%/级" },
+    { key: "t_mo_1", name: "血煞", maxLv: 5, effect: { lifesteal: 0.02 }, desc: "吸血 +2%/级" },
+    { key: "t_mo_2", name: "贪狼", maxLv: 5, effect: { gold: 0.10 },     desc: "灵石 +10%/级" },
+    { key: "t_mo_3", name: "噬魂", maxLv: 3, effect: { drop: 0.05 },     desc: "掉宝 +5%/级" },
   ]},
 ];
 
@@ -487,11 +505,12 @@ const ZONES = [
   { name: "鸿蒙本源", tier: 7, unlock: 63, desc: "鸿蒙道祖出没" },
 ];
 
+// 新手村怪物经验 ×5，降低死亡循环
 const MONSTERS = {
   0: [
-    { name: "野兔",   hp: 30,   atk: 4,   exp: 1,   gold: 1,   stone: 0, dropRate: 0.030 },
-    { name: "山猪",   hp: 70,   atk: 10,  exp: 2,   gold: 2,   stone: 0, dropRate: 0.032 },
-    { name: "灵狐",   hp: 50,   atk: 8,   exp: 2,   gold: 3,   stone: 1, dropRate: 0.035 },
+    { name: "野兔",   hp: 30,   atk: 4,   exp: 5,   gold: 1,   stone: 0, dropRate: 0.030 },
+    { name: "山猪",   hp: 70,   atk: 10,  exp: 10,  gold: 2,   stone: 0, dropRate: 0.032 },
+    { name: "灵狐",   hp: 50,   atk: 8,   exp: 10,  gold: 3,   stone: 1, dropRate: 0.035 },
   ],
   1: [
     { name: "妖狼",   hp: 300,  atk: 30,  exp: 15,  gold: 5,   stone: 1, dropRate: 0.025 },
@@ -611,53 +630,132 @@ function log(msg, cls = "") {
   while (logEl.children.length > 80) logEl.removeChild(logEl.firstChild);
 }
 
-// ==================== 云端存档 ====================
+// ==================== 本地存档 + 云端同步 ====================
 let cloudReady = false;
 let cloudSyncTimer = null;
+let lastCloudTry = 0;
+let cloudFailCount = 0;
+
+const SAVE_KEY = "xiuxian_arpg_save";
+const TIME_KEY = "xiuxian_arpg_time";
+
 function extractSaveData() {
   const d = { ...state };
   delete d.currentMonster; delete d.monsterHp; delete d.monsterMaxHp;
   delete d.isBoss; delete d.bossType;
+  d._saveTime = Date.now(); // 时间戳
   return d;
 }
+
+// 本地保存（永远成功）
+function saveLocal() {
+  try {
+    const data = extractSaveData();
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    localStorage.setItem(TIME_KEY, Date.now());
+    updateSyncStatus("本地存档：已保存", "local");
+    return true;
+  } catch (e) {
+    updateSyncStatus("本地存档：保存失败", "err");
+    return false;
+  }
+}
+
+// 本地加载
+function loadLocal() {
+  const saved = localStorage.getItem(SAVE_KEY);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      Object.assign(state, data);
+      // 兼容旧存档
+      state.exp = Math.max(0, safeNum(state.exp));
+      state.gold = Math.max(0, safeNum(state.gold));
+      state.stone = Math.max(0, safeNum(state.stone));
+      state.hp = Math.max(0, safeNum(state.hp));
+      state.maxHp = Math.max(100, safeNum(state.maxHp, 100));
+      state.stamina = Math.max(0, safeNum(state.stamina));
+      state.maxStamina = Math.max(100, safeNum(state.maxStamina, 100));
+      state.kills = Math.max(0, safeNum(state.kills));
+      state.sectPoint = Math.max(0, safeNum(state.sectPoint));
+      state.skillPoints = Math.max(0, safeNum(state.skillPoints));
+      state.talentPoints = Math.max(0, safeNum(state.talentPoints));
+      state.reincarnCount = Math.max(0, safeNum(state.reincarnCount));
+      state.reincarnBonus = Math.max(0, safeNum(state.reincarnBonus));
+      state.realmIndex = Math.max(0, Math.min(REALMS.length - 1, safeNum(state.realmIndex)));
+      state.currentZone = Math.max(0, Math.min(ZONES.length - 1, safeNum(state.currentZone)));
+      state.inventory = Array.isArray(state.inventory) ? state.inventory : [];
+      state.equipment = state.equipment || { weapon: null, armor: null, accessory: null };
+      state.gems = state.gems && typeof state.gems === "object" ? state.gems : {};
+      state.skills = state.skills && typeof state.skills === "object" ? state.skills : {};
+      state.sign = state.sign || { lastDate: "", streak: 0, days: [] };
+      state.knownBooks = state.knownBooks && typeof state.knownBooks === "object" ? state.knownBooks : {};
+      state.sect = state.sect || null;
+      state.skillCooldown = safeNum(state.skillCooldown);
+      state.buffAtk = safeNum(state.buffAtk);
+      state.buffDef = safeNum(state.buffDef);
+      state.stunTimer = safeNum(state.stunTimer);
+      state.pets = Array.isArray(state.pets) ? state.pets : [];
+      state.activePet = state.activePet || null;
+      state.talents = state.talents && typeof state.talents === "object" ? state.talents : {};
+      recalcPower();
+      return true;
+    } catch (e) { console.warn("本地存档读取失败", e); }
+  }
+  return false;
+}
+
+// 云端保存（可能失败，失败不丢本地）
 async function cloudSave() {
   if (!cloudReady) return;
+  // 如果最近 5 分钟失败 3 次，暂停 5 分钟
+  if (cloudFailCount >= 3 && Date.now() - lastCloudTry < 5 * 60 * 1000) {
+    return;
+  }
+  lastCloudTry = Date.now();
   try {
     const res = await fetch("/api/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data: extractSaveData() }),
     });
-    if (res.ok) updateSyncStatus("云端存档：已同步", "ok");
-    else updateSyncStatus("云端存档：同步失败", "err");
-  } catch (e) { updateSyncStatus("云端存档：离线", "err"); }
+    if (res.ok) {
+      cloudFailCount = 0;
+      updateSyncStatus("云端存档：已同步", "ok");
+    } else {
+      cloudFailCount++;
+      updateSyncStatus("云端存档：同步失败（本地已保存）", "err");
+    }
+  } catch (e) {
+    cloudFailCount++;
+    updateSyncStatus("云端存档：离线（本地已保存）", "err");
+  }
 }
+
+// 云端加载
 async function cloudLoad() {
   try {
     const res = await fetch("/api/sync");
     if (res.ok) {
       const data = await res.json();
       if (data && data.state) {
-        Object.assign(state, data.state);
-        state.currentMonster = null;
-        state.monsterHp = 0; state.monsterMaxHp = 0;
-        state.isBoss = false; state.bossType = null;
-        recalcPower();
-        updateSyncStatus("云端存档：已载入", "ok");
-        return true;
+        return data.state;
       }
     }
   } catch (e) {}
-  return false;
+  return null;
 }
+
 function updateSyncStatus(text, cls = "") {
   const el = document.getElementById("syncStatus");
   el.textContent = text;
   el.className = "sync-status " + cls;
 }
+
 function scheduleCloudSave() {
   if (!cloudReady) return;
   if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+  // 30 秒后尝试同步
   cloudSyncTimer = setTimeout(cloudSave, 30000);
 }
 
@@ -752,6 +850,8 @@ function doSign() {
   log(`📅 签到成功！连续 ${s.streak} 天，获得修为 +${50 * s.streak}，灵石 +${30 * s.streak}`, "gold");
   renderSign();
   updateUI();
+  saveLocal();
+  scheduleCloudSave();
 }
 function renderSign() {
   const info = checkSign();
@@ -783,7 +883,7 @@ function learnSkill(key) {
   state.skillPoints -= cost;
   state.skills[key] = { level: 1 };
   log(`学会功法【${skill.name}】`, "epic");
-  renderSkills(); recalcPower(); updateUI();
+  renderSkills(); recalcPower(); updateUI(); saveLocal(); scheduleCloudSave();
 }
 function levelUpSkill(key) {
   const skill = SKILLS.find(s => s.key === key);
@@ -794,7 +894,7 @@ function levelUpSkill(key) {
   state.skillPoints -= cost;
   owned.level++;
   log(`【${skill.name}】升级到 ${owned.level} 级`, "epic");
-  renderSkills(); recalcPower(); updateUI();
+  renderSkills(); recalcPower(); updateUI(); saveLocal(); scheduleCloudSave();
 }
 function getSkillBonus() {
   const bonus = { power: 0, hp: 0, lifesteal: 0, crit: 0, exp: 0, gold: 0 };
@@ -894,7 +994,7 @@ function dropPet() {
 }
 function setActivePet(id) {
   state.activePet = id;
-  recalcPower(); renderPets(); updateUI();
+  recalcPower(); renderPets(); updateUI(); saveLocal(); scheduleCloudSave();
   log("已切换出战灵兽", "pet");
 }
 function releasePet(id) {
@@ -902,7 +1002,7 @@ function releasePet(id) {
   if (!pet) return;
   if (state.activePet === id) state.activePet = null;
   state.pets = state.pets.filter(p => p.id !== id);
-  recalcPower(); renderPets(); updateUI();
+  recalcPower(); renderPets(); updateUI(); saveLocal(); scheduleCloudSave();
   log(`放生灵兽【${pet.name}】`, "pet");
 }
 function upgradePet(id) {
@@ -912,7 +1012,7 @@ function upgradePet(id) {
   if (state.gold < cost) { log(`灵石不足（需要 ${cost}）`, "danger"); return; }
   state.gold -= cost;
   pet.level++;
-  recalcPower(); renderPets(); updateUI();
+  recalcPower(); renderPets(); updateUI(); saveLocal(); scheduleCloudSave();
   log(`【${pet.name}】升级到 Lv.${pet.level}`, "pet");
 }
 function renderPets() {
@@ -986,7 +1086,7 @@ function learnTalent(key) {
   state.talentPoints--;
   state.talents[key] = cur + 1;
   log(`学习天赋【${node.name}】 Lv.${state.talents[key]}`, "talent");
-  recalcPower(); renderTalents(); updateUI();
+  recalcPower(); renderTalents(); updateUI(); saveLocal(); scheduleCloudSave();
 }
 function renderTalents() {
   const tree = document.getElementById("talentTree");
@@ -1059,7 +1159,7 @@ function rerollRandomAffix() {
   const newVal = randFloat(affixDef.min, affixDef.max);
   affix.value = newVal; affix.name = affixDef.name;
   log(`洗练【${item.quality}·${item.name}】，${affix.name} 变为 ${(newVal*100).toFixed(1)}%`, "epic");
-  updateUI(); renderInventory();
+  updateUI(); renderInventory(); saveLocal(); scheduleCloudSave();
 }
 
 // ==================== 属性计算 ====================
@@ -1161,7 +1261,7 @@ function equipItem(item) {
   state.inventory = state.inventory.filter(i => i.id !== item.id);
   recalcPower();
   log(`装备【${item.quality}·${item.name} +${item.level}】`, item.qualityColor);
-  updateUI(); renderInventory();
+  updateUI(); renderInventory(); saveLocal(); scheduleCloudSave();
 }
 function unequipItem(slot) {
   const item = state.equipment[slot];
@@ -1170,7 +1270,7 @@ function unequipItem(slot) {
   state.equipment[slot] = null;
   recalcPower();
   log(`卸下【${item.quality}·${item.name}】`);
-  updateUI(); renderInventory();
+  updateUI(); renderInventory(); saveLocal(); scheduleCloudSave();
 }
 function sellItem(item) {
   const quality = QUALITY.find(q => q.name === item.quality);
@@ -1180,7 +1280,7 @@ function sellItem(item) {
   state.gold += price;
   state.inventory = state.inventory.filter(i => i.id !== item.id);
   log(`出售【${item.quality}·${item.name}】，获得 ${price} 灵石`, "gold");
-  updateUI(); renderInventory();
+  updateUI(); renderInventory(); saveLocal(); scheduleCloudSave();
 }
 function sellByQuality(quality) {
   const items = state.inventory.filter(i => i.quality === quality);
@@ -1196,7 +1296,7 @@ function sellByQuality(quality) {
   state.inventory = state.inventory.filter(i => i.quality !== quality);
   state.gold += totalGold;
   log(`批量出售 ${items.length} 件【${quality}】装备，获得 ${totalGold} 灵石`, "gold");
-  updateUI(); renderInventory();
+  updateUI(); renderInventory(); saveLocal(); scheduleCloudSave();
 }
 
 // ==================== UI ====================
@@ -1408,7 +1508,7 @@ function bindInventoryEvents() {
       } else if (btn.dataset.enhance) {
         const id = parseFloat(btn.dataset.enhance);
         const item = state.inventory.find(i => i.id === id);
-        if (item && enhanceEquip(item)) renderInventory();
+        if (item && enhanceEquip(item)) { renderInventory(); saveLocal(); scheduleCloudSave(); }
       } else if (btn.dataset.sell) {
         const id = parseFloat(btn.dataset.sell);
         const item = state.inventory.find(i => i.id === id);
@@ -1428,7 +1528,7 @@ function bindInventoryEvents() {
       const item = [...state.inventory, ...Object.values(state.equipment)].find(i => i && i.id === id);
       if (item) {
         unsocketGem(item, idx);
-        renderInventory(); updateUI();
+        renderInventory(); updateUI(); saveLocal(); scheduleCloudSave();
       }
     }
   });
@@ -1445,7 +1545,7 @@ function openSocketPanel(item) {
   if (!chosen) return;
   const gem = GEMS.find(g => g.name === chosen.trim());
   if (!gem) { log("宝石名称不正确", "danger"); return; }
-  if (socketGem(item, gem.key)) { renderInventory(); updateUI(); }
+  if (socketGem(item, gem.key)) { renderInventory(); updateUI(); saveLocal(); scheduleCloudSave(); }
 }
 
 function renderShop(sub = "normal") {
@@ -1471,7 +1571,7 @@ function renderShop(sub = "normal") {
         if (state.gold >= item.price) {
           state.gold -= item.price;
           item.action();
-          updateUI();
+          updateUI(); saveLocal(); scheduleCloudSave();
         } else log("灵石不足！", "danger");
       });
     });
@@ -1504,7 +1604,7 @@ function renderShop(sub = "normal") {
             const g = GEMS.find(x => x.key === item.key);
             log(`购买【${g.name}】×${item.count}`, "gem");
           }
-          updateUI(); renderInventory();
+          updateUI(); renderInventory(); saveLocal(); scheduleCloudSave();
         } else log("灵石不足！", "danger");
       });
     });
@@ -1529,7 +1629,7 @@ function renderShop(sub = "normal") {
           state.gold -= q.price;
           const pet = generatePet(q.name);
           addPet(pet);
-          updateUI(); renderPets();
+          updateUI(); renderPets(); saveLocal(); scheduleCloudSave();
         } else log("灵石不足！", "danger");
       });
     });
@@ -1553,7 +1653,7 @@ function renderZones() {
         state.currentMonster = null;
         state.isBoss = false;
         log(`前往【${zone.name}】`, "rare");
-        renderZones(); spawnMonster();
+        renderZones(); spawnMonster(); saveLocal(); scheduleCloudSave();
       });
     }
     zoneSelect.appendChild(div);
@@ -1651,28 +1751,16 @@ function fightTick() {
     const pointText = pointGain > 0 ? `，功法点 +${pointGain}` : "";
     log(`击败【${m.name}】${critText}，修为 +${fmt(expGain)}，灵石 +${fmt(goldGain)}，强化石 +${m.stone}${pointText}`, isCrit ? "legend" : "");
 
-    // 掉落装备
     const dropRate = Math.min(0.95, m.dropRate + state.dropBonus);
     if (Math.random() < dropRate) {
       const eq = generateEquip(null, m.qualityBoost || 0);
       state.inventory.push(eq);
       log(`✦ 掉落【${eq.quality}·${eq.name}】，战力 +${eq.power}`, eq.qualityColor);
-      renderInventory();  // ← 新增：立刻刷新背包 UI
-    }
-
-    // 掉落宝石
-    if (Math.random() < 0.10) {
-      dropGem();
       renderInventory();
     }
+    if (Math.random() < 0.10) { dropGem(); renderInventory(); }
+    if (Math.random() < 0.005) { dropPet(); renderPets(); }
 
-    // 掉落灵兽
-    if (Math.random() < 0.005) {
-      dropPet();
-      renderPets();
-    }
-
-    // Boss 掉落技能书
     if (state.isBoss && m.bookDropRate) {
       if (Math.random() < m.bookDropRate) {
         const availableBooks = getAvailableBooks();
@@ -1712,13 +1800,18 @@ function fightTick() {
       if (state.buffDef > 0) monsterDamage = Math.floor(monsterDamage * 0.5);
       state.hp -= monsterDamage;
       if (state.hp <= 0) {
-        state.hp = state.maxHp * 0.5;
-        state.exp = Math.max(0, state.exp - Math.floor(REALMS[state.realmIndex].need * 0.05));
-        log(`你被【${state.currentMonster.name}】击倒，修为损失，气血恢复一半`, "danger");
+        state.hp = state.maxHp;  // 死亡恢复满血
+        state.exp = Math.max(0, state.exp - Math.floor(REALMS[state.realmIndex].need * 0.01));  // 惩罚 1%
+        log(`你被【${state.currentMonster.name}】击倒，修为损失 1%，气血恢复满`, "danger");
       }
     }
   }
   updateUI();
+  // 每 10 秒自动本地保存
+  if (Date.now() - (window._lastLocalSave || 0) > 10000) {
+    window._lastLocalSave = Date.now();
+    saveLocal();
+  }
 }
 
 function doBreak() {
@@ -1735,10 +1828,10 @@ function doBreak() {
   state.basePower = next.power;
   recalcPower();
   log(`★ 突破成功！当前境界：${next.name}`, "legend");
-  renderZones(); updateUI();
+  renderZones(); updateUI(); saveLocal(); scheduleCloudSave();
 }
 
-// ==================== 宗门技能阁（修复：可升级到 5 级）====================
+// ==================== 宗门技能阁 ====================
 function renderSkillShop() {
   const box = document.getElementById("skillShop");
   if (!box) return;
@@ -1776,7 +1869,7 @@ function renderSkillShop() {
       state.sectPoint -= book.price;
       state.knownBooks[book.key] = owned + 1;
       log(`兑换技能书【${book.name}】成功，Lv.${state.knownBooks[book.key]}`, "book");
-      recalcPower(); updateUI(); renderSkillShop();
+      recalcPower(); updateUI(); renderSkillShop(); saveLocal(); scheduleCloudSave();
     });
   });
 }
@@ -1867,7 +1960,7 @@ function renderSectSelect() {
       state.skills = {};
       const sect = SECTS.find(s => s.key === key);
       log(`★ 加入【${sect.name}】，学会主动技能【${sect.skill}】`, "legend");
-      renderSectSelect(); renderSkillBar(); renderSkills(); recalcPower(); updateUI();
+      renderSectSelect(); renderSkillBar(); renderSkills(); recalcPower(); updateUI(); saveLocal(); scheduleCloudSave();
     });
   });
 }
@@ -1894,7 +1987,7 @@ function doReincarn() {
   recalcPower();
   spawnMonster(); renderZones(); renderInventory(); renderSkillBar();
   renderSectSelect(); renderSkillShop(); renderTalents(); renderPets();
-  updateUI();
+  updateUI(); saveLocal(); scheduleCloudSave();
   log(`★★★ 转生成功！转生 ${state.reincarnCount} 次，永久加成 +${(state.reincarnBonus*100).toFixed(0)}%，天赋点 +3`, "myth");
 }
 
@@ -1905,96 +1998,22 @@ function regenLoop() {
   updateUI();
 }
 
-// ==================== 存档 ====================
+// ==================== 存档操作 ====================
 function saveGame() {
   if (!cloudReady) return;
-  state.exp = Math.max(0, safeNum(state.exp));
-  state.gold = Math.max(0, safeNum(state.gold));
-  state.stone = Math.max(0, safeNum(state.stone));
-  state.hp = Math.max(0, safeNum(state.hp));
-  state.stamina = Math.max(0, safeNum(state.stamina));
-  state.kills = Math.max(0, safeNum(state.kills));
-  state.sectPoint = Math.max(0, safeNum(state.sectPoint));
-  state.skillPoints = Math.max(0, safeNum(state.skillPoints));
-  state.talentPoints = Math.max(0, safeNum(state.talentPoints));
-  state.monsterHp = safeNum(state.monsterHp);
-  state.monsterMaxHp = safeNum(state.monsterMaxHp, 1);
-  localStorage.setItem("xiuxian_arpg_save", JSON.stringify(extractSaveData()));
-  localStorage.setItem("xiuxian_arpg_time", Date.now());
+  saveLocal();
   scheduleCloudSave();
 }
-function loadGame() {
-  const saved = localStorage.getItem("xiuxian_arpg_save");
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
-      Object.assign(state, data);
-      state.exp = Math.max(0, safeNum(state.exp));
-      state.gold = Math.max(0, safeNum(state.gold));
-      state.stone = Math.max(0, safeNum(state.stone));
-      state.hp = Math.max(0, safeNum(state.hp));
-      state.maxHp = Math.max(100, safeNum(state.maxHp, 100));
-      state.stamina = Math.max(0, safeNum(state.stamina));
-      state.maxStamina = Math.max(100, safeNum(state.maxStamina, 100));
-      state.kills = Math.max(0, safeNum(state.kills));
-      state.sectPoint = Math.max(0, safeNum(state.sectPoint));
-      state.skillPoints = Math.max(0, safeNum(state.skillPoints));
-      state.talentPoints = Math.max(0, safeNum(state.talentPoints));
-      state.reincarnCount = Math.max(0, safeNum(state.reincarnCount));
-      state.reincarnBonus = Math.max(0, safeNum(state.reincarnBonus));
-      state.realmIndex = Math.max(0, Math.min(REALMS.length - 1, safeNum(state.realmIndex)));
-      state.currentZone = Math.max(0, Math.min(ZONES.length - 1, safeNum(state.currentZone)));
-      state.inventory = Array.isArray(state.inventory) ? state.inventory : [];
-      state.equipment = state.equipment || { weapon: null, armor: null, accessory: null };
-      state.gems = state.gems && typeof state.gems === "object" ? state.gems : {};
-      state.skills = state.skills && typeof state.skills === "object" ? state.skills : {};
-      state.sign = state.sign || { lastDate: "", streak: 0, days: [] };
-      state.knownBooks = state.knownBooks && typeof state.knownBooks === "object" ? state.knownBooks : {};
-      state.sect = state.sect || null;
-      state.skillCooldown = safeNum(state.skillCooldown);
-      state.buffAtk = safeNum(state.buffAtk);
-      state.buffDef = safeNum(state.buffDef);
-      state.stunTimer = safeNum(state.stunTimer);
-      state.pets = Array.isArray(state.pets) ? state.pets : [];
-      state.activePet = state.activePet || null;
-      state.talents = state.talents && typeof state.talents === "object" ? state.talents : {};
-      recalcPower();
-    } catch (e) { console.warn("存档读取失败"); }
-  }
-}
-function offlineEarnings() {
-  const last = localStorage.getItem("xiuxian_arpg_time");
-  const now = Date.now();
-  if (last) {
-    const lastTs = parseInt(last, 10);
-    if (!isNaN(lastTs) && lastTs > 0) {
-      const diff = Math.floor((now - lastTs) / 1000);
-      if (diff > 60 && diff < 86400 * 7) {
-        const minutes = Math.floor(diff / 60);
-        const realm = REALMS[state.realmIndex];
-        const expGain = Math.min(minutes * Math.floor(realm.need * 0.001) + 1, Math.floor(realm.need * 0.5));
-        const goldGain = Math.min(minutes * 5, 50000);
-        const stoneGain = Math.min(minutes * 2, 10000);
-        state.exp += safeNum(expGain);
-        state.gold += safeNum(goldGain);
-        state.stone += safeNum(stoneGain);
-        log(`离线 ${minutes} 分钟，获得修为 +${fmt(expGain)}，灵石 +${fmt(goldGain)}，强化石 +${fmt(stoneGain)}`, "gold");
-      }
-    }
-  }
-  localStorage.setItem("xiuxian_arpg_time", now);
-}
 
-// ==================== 清档（修复：不再被云档覆盖）====================
+// ==================== 清档（本地+云端）====================
 function resetGame() {
   if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
 
-  // 1. 清本地
-  localStorage.removeItem("xiuxian_arpg_save");
-  localStorage.removeItem("xiuxian_arpg_time");
+  localStorage.removeItem(SAVE_KEY);
+  localStorage.removeItem(TIME_KEY);
   sessionStorage.setItem("skipCloudLoad", "1");
 
-  // 2. 就地重置 state 的所有字段
+  // 重置内存 state
   state.realmIndex = 0;
   state.exp = 0;
   state.hp = 100;
@@ -2039,19 +2058,53 @@ function resetGame() {
   state.talentPoints = 0;
   state.talents = {};
 
-  // 3. 用空档覆盖云端
+  saveLocal();
+
   cloudReady = true;
   fetch("/api/sync", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ data: extractSaveData() }),
   })
-  .then(() => {
-    setTimeout(() => location.reload(), 800);
-  })
-  .catch(() => {
-    setTimeout(() => location.reload(), 800);
+  .catch(() => {})
+  .finally(() => {
+    setTimeout(() => location.reload(), 1500);
   });
+}
+
+// ==================== 导出 / 导入 ====================
+function exportSave() {
+  const data = extractSaveData();
+  const str = JSON.stringify(data);
+  const area = document.getElementById("exportArea");
+  area.value = str;
+  area.select();
+  try {
+    document.execCommand("copy");
+    log("存档码已复制到剪贴板，同时显示在文本框里", "gold");
+  } catch (e) {
+    log("存档码已显示在文本框里，请手动复制", "gold");
+  }
+}
+
+function importSave() {
+  const area = document.getElementById("importArea");
+  const str = area.value.trim();
+  if (!str) { log("请先把存档码粘贴到文本框里", "danger"); return; }
+  try {
+    const data = JSON.parse(str);
+    if (!data || typeof data !== "object") throw new Error("格式错误");
+    if (!confirm("导入会覆盖当前存档，确定吗？")) return;
+    Object.assign(state, data);
+    recalcPower();
+    saveLocal();
+    updateUI(); renderInventory(); renderZones(); renderSkills(); renderSign();
+    renderSectSelect(); renderSkillShop(); renderSkillBar(); renderPets(); renderTalents();
+    log("存档导入成功", "gold");
+    setTimeout(() => location.reload(), 800);
+  } catch (e) {
+    log("导入失败：存档码格式不正确", "danger");
+  }
 }
 
 // ==================== 事件 ====================
@@ -2090,12 +2143,12 @@ document.querySelectorAll(".sub-tab").forEach(tab => {
 });
 document.getElementById("signBtn").addEventListener("click", doSign);
 document.getElementById("sectTaskBtn").addEventListener("click", () => {
-  if (state.sectPoint >= 20) { state.sectPoint -= 20; state.sectQuestTarget += 5; log("接取高级宗门任务，目标提升", "rare"); }
+  if (state.sectPoint >= 20) { state.sectPoint -= 20; state.sectQuestTarget += 5; log("接取高级宗门任务，目标提升", "rare"); saveLocal(); scheduleCloudSave(); }
   else log("宗门贡献不足（需要 20）", "danger");
   updateUI();
 });
 document.getElementById("sectUpgradeBtn").addEventListener("click", () => {
-  if (state.sectPoint >= 30) { state.sectPoint -= 30; state.basePower += 15; recalcPower(); log("消耗 30 宗门贡献，基础战力 +15", "epic"); }
+  if (state.sectPoint >= 30) { state.sectPoint -= 30; state.basePower += 15; recalcPower(); log("消耗 30 宗门贡献，基础战力 +15", "epic"); saveLocal(); scheduleCloudSave(); }
   else log("宗门贡献不足（需要 30）", "danger");
   updateUI();
 });
@@ -2103,46 +2156,66 @@ document.getElementById("bossBtn1").addEventListener("click", () => spawnBoss("z
 document.getElementById("bossBtn2").addEventListener("click", () => spawnBoss("world"));
 document.getElementById("reincarnBtn").addEventListener("click", doReincarn);
 document.getElementById("resetBtn").addEventListener("click", resetGame);
+document.getElementById("exportBtn").addEventListener("click", exportSave);
+document.getElementById("importBtn").addEventListener("click", importSave);
 
-// ==================== 启动（修复：清档后跳过云端加载）====================
+// ==================== 启动 ====================
 async function init() {
-  loadGame();
+  // 1. 先加载本地（最重要）
+  const hasLocal = loadLocal();
   bindInventoryEvents();
   log("你于洞府中睁开双眼，开始了偷偷摸摸的修仙之路……");
-  log("提示：去【宗门】选流派、换技能书，去【灵兽】出战宠物。", "rare");
-  spawnMonster(); renderZones(); renderInventory(); renderShop(); renderSkills();
-  renderSign(); renderSectSelect(); renderSkillShop(); renderSkillBar();
-  renderPets(); renderTalents(); updateUI();
-
-  // 如果是清档后刷新，跳过云端加载
-  if (sessionStorage.getItem("skipCloudLoad") === "1") {
-    sessionStorage.removeItem("skipCloudLoad");
-    updateSyncStatus("云端存档：已清空", "");
-    cloudReady = true;
-    await cloudSave();
-    updateSyncStatus("云端存档：已同步", "ok");
-  } else {
-    updateSyncStatus("云端存档：连接中…", "");
-    const hasCloud = await cloudLoad();
-    if (hasCloud) {
-      log("已从云端载入存档", "gold");
-      if (!state.currentMonster || !isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) {
-        spawnMonster();
-      }
-      updateUI(); renderInventory(); renderZones(); renderSkills(); renderSign();
-      renderSectSelect(); renderSkillShop(); renderSkillBar(); renderPets(); renderTalents();
-    } else {
-      updateSyncStatus("云端存档：首次上传", "");
-      await cloudSave();
+  if (hasLocal) {
+    log("已从本地读取存档", "gold");
+    if (!state.currentMonster || !isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) {
+      spawnMonster();
     }
-    cloudReady = true;
-    updateSyncStatus("云端存档：已同步", "ok");
+    updateUI(); renderInventory(); renderZones(); renderSkills(); renderSign();
+    renderSectSelect(); renderSkillShop(); renderSkillBar(); renderPets(); renderTalents();
+  } else {
+    spawnMonster(); renderZones(); renderInventory(); renderShop(); renderSkills();
+    renderSign(); renderSectSelect(); renderSkillShop(); renderSkillBar();
+    renderPets(); renderTalents(); updateUI();
   }
+
+  // 2. 再尝试从云端合并（如果本地没档，或者云端更新）
+  updateSyncStatus("云端存档：连接中…", "");
+  try {
+    const cloudState = await cloudLoad();
+    if (cloudState) {
+      // 对比时间戳：云端更新才用云端的
+      const localTime = parseInt(localStorage.getItem(TIME_KEY) || "0", 10);
+      const cloudTime = cloudState._saveTime || 0;
+      if (cloudTime > localTime) {
+        log("云端存档较新，使用云端存档", "gold");
+        Object.assign(state, cloudState);
+        recalcPower();
+        saveLocal();
+        if (!state.currentMonster || !isFinite(state.monsterHp) || !isFinite(state.monsterMaxHp)) {
+          spawnMonster();
+        }
+        updateUI(); renderInventory(); renderZones(); renderSkills(); renderSign();
+        renderSectSelect(); renderSkillShop(); renderSkillBar(); renderPets(); renderTalents();
+      } else {
+        log("本地存档较新，跳过云端覆盖", "rare");
+      }
+    } else {
+      // 云端没有，把本地上传
+      log("云端无存档，本地上传", "gold");
+    }
+  } catch (e) {
+    log("云端连接失败，仅使用本地存档", "danger");
+  }
+
+  cloudReady = true;
+  updateSyncStatus("本地存档：已保存", "local");
 
   setInterval(fightTick, 1000);
   setInterval(regenLoop, 2000);
-  setInterval(() => { if (cloudReady) saveGame(); }, 60000);
-  }
+  setInterval(() => { if (cloudReady) saveLocal(); }, 60000);  // 每 60 秒本地保存
+  setInterval(() => { if (cloudReady) cloudSave(); }, 60000);  // 每 60 秒尝试云端同步
+  window.addEventListener("beforeunload", () => { saveLocal(); });
+}
 init();
 </script>
 </body>
