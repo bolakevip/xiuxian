@@ -1352,6 +1352,11 @@ function updateUI() {
 
   document.getElementById("bossBtn1").disabled = state.isBoss || state.hp <= 0;
   document.getElementById("bossBtn2").disabled = state.isBoss || state.hp <= 0 || state.realmIndex < 9;
+  // 自动本地保存（最多 3 秒一次）
+  if (Date.now() - (window._lastSave || 0) > 3000) {
+    window._lastSave = Date.now();
+    saveLocal();
+  }
 }
 
 function renderInventory() {
