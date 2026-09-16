@@ -1651,15 +1651,28 @@ function fightTick() {
     const pointText = pointGain > 0 ? `，功法点 +${pointGain}` : "";
     log(`击败【${m.name}】${critText}，修为 +${fmt(expGain)}，灵石 +${fmt(goldGain)}，强化石 +${m.stone}${pointText}`, isCrit ? "legend" : "");
 
+    // 掉落装备
     const dropRate = Math.min(0.95, m.dropRate + state.dropBonus);
     if (Math.random() < dropRate) {
       const eq = generateEquip(null, m.qualityBoost || 0);
       state.inventory.push(eq);
       log(`✦ 掉落【${eq.quality}·${eq.name}】，战力 +${eq.power}`, eq.qualityColor);
+      renderInventory();  // ← 新增：立刻刷新背包 UI
     }
-    if (Math.random() < 0.10) dropGem();
-    if (Math.random() < 0.005) dropPet();
 
+    // 掉落宝石
+    if (Math.random() < 0.10) {
+      dropGem();
+      renderInventory();
+    }
+
+    // 掉落灵兽
+    if (Math.random() < 0.005) {
+      dropPet();
+      renderPets();
+    }
+
+    // Boss 掉落技能书
     if (state.isBoss && m.bookDropRate) {
       if (Math.random() < m.bookDropRate) {
         const availableBooks = getAvailableBooks();
