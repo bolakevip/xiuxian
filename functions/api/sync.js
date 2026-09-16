@@ -1,29 +1,21 @@
-export async function onRequestGet(context) {
-  const { env } = context;
-  try {
-    const data = await env.XIUXIAN_KV.get("default-save", { type: "json" });
-    return new Response(JSON.stringify({ state: data }), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ state: null }), {
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-}
+function resetGame() {
+  if (!confirm("确定要清空存档重新开始吗？此操作不可恢复。")) return;
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
-  try {
-    const body = await request.json();
-    if (!body || !body.data) {
-      return new Response(JSON.stringify({ error: "Missing data" }), { status: 400 });
-    }
-    await env.XIUXIAN_KV.put("default-save", JSON.stringify(body.data));
-    return new Response(JSON.stringify({ ok: true }), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400 });
-  }
+  // 1. 先清本地
+  localStorage.removeItem("xiuxian_arpg_save");
+  localStorage.removeItem("xiuxian_arpg_time");
+  sessionStorage.setItem("skipCloudLoad", "1");
+
+  // 2. 清云端，不管成功失败都刷新
+  cloudReady = true;
+  fetch("/api/sync", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data: null }),
+  })
+  .catch(() => {})
+  .finally(() => {
+    // 等 500ms 让 KV 写入生效，再刷新
+    setTimeout(() => location.reload(), 500);
+  });
 }
