@@ -1981,44 +1981,59 @@ function resetGame() {
   localStorage.removeItem("xiuxian_arpg_time");
   sessionStorage.setItem("skipCloudLoad", "1");
 
-  // 2. 构造一个全新空档，直接覆盖云端
-  const emptyState = {
-    realmIndex: 0, exp: 0, hp: 100, maxHp: 100,
-    stamina: 100, maxStamina: 100,
-    basePower: 10, totalEquipBonus: 0, power: 10,
-    critRate: 0.05, lifesteal: 0,
-    gold: 0, stone: 0, kills: 0,
-    sectPoint: 0, sectQuestProgress: 0, sectQuestTarget: 5,
-    autoBreak: true,
-    inventory: [],
-    equipment: { weapon: null, armor: null, accessory: null },
-    currentZone: 0,
-    reincarnCount: 0, reincarnBonus: 0,
-    setBonus: { active: false, count: 0, name: "" },
-    gems: {},
-    sign: { lastDate: "", streak: 0, days: [] },
-    skills: {},
-    skillPoints: 0,
-    sect: null,
-    skillCooldown: 0, buffAtk: 0, buffAtkValue: 0, buffDef: 0, stunTimer: 0,
-    knownBooks: {},
-    pets: [],
-    activePet: null,
-    talentPoints: 0,
-    talents: {},
-  };
+  // 2. 就地重置 state 的所有字段
+  state.realmIndex = 0;
+  state.exp = 0;
+  state.hp = 100;
+  state.maxHp = 100;
+  state.stamina = 100;
+  state.maxStamina = 100;
+  state.basePower = 10;
+  state.totalEquipBonus = 0;
+  state.power = 10;
+  state.critRate = 0.05;
+  state.lifesteal = 0;
+  state.gold = 0;
+  state.stone = 0;
+  state.kills = 0;
+  state.sectPoint = 0;
+  state.sectQuestProgress = 0;
+  state.sectQuestTarget = 5;
+  state.inventory = [];
+  state.equipment = { weapon: null, armor: null, accessory: null };
+  state.currentZone = 0;
+  state.currentMonster = null;
+  state.monsterHp = 0;
+  state.monsterMaxHp = 0;
+  state.isBoss = false;
+  state.bossType = null;
+  state.reincarnCount = 0;
+  state.reincarnBonus = 0;
+  state.setBonus = { active: false, count: 0, name: "" };
+  state.gems = {};
+  state.sign = { lastDate: "", streak: 0, days: [] };
+  state.skills = {};
+  state.skillPoints = 0;
+  state.sect = null;
+  state.skillCooldown = 0;
+  state.buffAtk = 0;
+  state.buffAtkValue = 0;
+  state.buffDef = 0;
+  state.stunTimer = 0;
+  state.knownBooks = {};
+  state.pets = [];
+  state.activePet = null;
+  state.talentPoints = 0;
+  state.talents = {};
 
-  // 3. 用空档覆盖本地和云端
-  state = emptyState;
+  // 3. 用空档覆盖云端
   cloudReady = true;
-
   fetch("/api/sync", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: emptyState }),
+    body: JSON.stringify({ data: extractSaveData() }),
   })
   .then(() => {
-    // 等云端覆盖完成，再刷新
     setTimeout(() => location.reload(), 800);
   })
   .catch(() => {
