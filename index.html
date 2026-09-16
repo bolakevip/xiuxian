@@ -1785,10 +1785,11 @@ function fightTick() {
     }
 
     if (state.sectQuestProgress >= state.sectQuestTarget) {
-      state.sectPoint += 10;
+      const reward = 5 + Math.floor(state.sectQuestTarget / 5);
+      state.sectPoint += reward;
       state.sectQuestProgress = 0;
       state.sectQuestTarget = Math.min(50, state.sectQuestTarget + 5);
-      log("★ 宗门任务完成！贡献 +10", "legend");
+      log(`★ 宗门任务完成！贡献 +${reward}`, "legend");
     }
 
     const realm = REALMS[state.realmIndex];
