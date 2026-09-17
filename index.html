@@ -351,7 +351,11 @@
   </div>
 
   <div id="log"></div>
-  <div class="sync-status" id="syncStatus">本地存档：已保存</div>
+ <div class="sync-status" id="syncStatus">
+  <span id="localStatus">本地：已保存</span>
+  <span style="margin:0 8px;color:#444;">|</span>
+  <span id="cloudStatus">云端：等待同步</span>
+</div>
   <button class="btn" id="breakBtn" disabled>突破境界</button>
 </div>
 <button class="toggle" id="toggleBtn">迷你模式</button>
@@ -653,7 +657,11 @@ function saveLocal() {
     const data = extractSaveData();
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
     localStorage.setItem(TIME_KEY, Date.now());
-    updateSyncStatus("本地存档：已保存", "local");
+    const el = document.getElementById("localStatus");
+if (el) {
+  el.textContent = "本地：已保存 " + new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  el.style.color = "#4ec9b0";
+}
     return true;
   } catch (e) {
     updateSyncStatus("本地存档：保存失败", "err");
@@ -721,14 +729,26 @@ async function cloudSave() {
     });
     if (res.ok) {
       cloudFailCount = 0;
-      updateSyncStatus("云端存档：已同步", "ok");
+      const el = document.getElementById("cloudStatus");
+if (el) {
+  el.textContent = "云端：已同步 " + new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  el.style.color = "#4ec9b0";
+}
     } else {
       cloudFailCount++;
-      updateSyncStatus("云端存档：同步失败（本地已保存）", "err");
+      const el = document.getElementById("cloudStatus");
+if (el) {
+  el.textContent = "云端：同步失败";
+  el.style.color = "#f14c4c";
+}
     }
   } catch (e) {
     cloudFailCount++;
-    updateSyncStatus("云端存档：离线（本地已保存）", "err");
+    const el = document.getElementById("cloudStatus");
+if (el) {
+  el.textContent = "云端：离线";
+  el.style.color = "#f14c4c";
+}
   }
 }
 
@@ -2216,7 +2236,7 @@ async function init() {
   }
 
   cloudReady = true;
-  updateSyncStatus("本地存档：已保存", "local");
+  // 不用改状态栏，交给 saveLocal 和 cloudSave 自己处理
 
   setInterval(fightTick, 1000);
   setInterval(regenLoop, 2000);
