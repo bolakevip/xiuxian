@@ -663,11 +663,7 @@ if (el) {
   el.style.color = "#4ec9b0";
 }
     return true;
-  } catch (e) {
-    updateSyncStatus("本地存档：保存失败", "err");
-    return false;
-  }
-}
+ }
 
 // 本地加载
 function loadLocal() {
@@ -766,11 +762,6 @@ async function cloudLoad() {
   return null;
 }
 
-function updateSyncStatus(text, cls = "") {
-  const el = document.getElementById("syncStatus");
-  el.textContent = text;
-  el.className = "sync-status " + cls;
-}
 
 function scheduleCloudSave() {
   if (!cloudReady) return;
@@ -2207,8 +2198,7 @@ async function init() {
   }
 
   // 2. 再尝试从云端合并（如果本地没档，或者云端更新）
-  updateSyncStatus("云端存档：连接中…", "");
-  try {
+    try {
     const cloudState = await cloudLoad();
     if (cloudState) {
       // 对比时间戳：云端更新才用云端的
