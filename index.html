@@ -659,13 +659,16 @@ function saveLocal() {
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
     localStorage.setItem(TIME_KEY, Date.now());
     const el = document.getElementById("localStatus");
-if (el) {
-  el.textContent = "本地：已保存 " + new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-  el.style.color = "#4ec9b0";
-}
+    if (el) {
+      el.textContent = "本地：已保存 " + new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+      el.style.color = "#4ec9b0";
+    }
     return true;
- }
-
+  } catch (e) {
+    console.warn("本地保存失败", e);
+    return false;
+  }
+}
 // 本地加载
 function loadLocal() {
   const saved = localStorage.getItem(SAVE_KEY);
